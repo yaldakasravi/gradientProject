@@ -122,60 +122,63 @@ def calculate_metrics(labels, similarities,threshold):
 def main():
     model = load_model(model_path)
     metrics_results = []
-    fixed_threshold = 0.65
+
     # Instead of noise_levels, define mask thickness levels (e.g., 10% to 100% of the image height)
     mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
 
     avg_metrics = {thickness: {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} for thickness in mask_thickness_levels}
+    for th in np.linspace(0.3,1,num=14):
+        for mask_thickness in mask_thickness_levels:
+            all_metrics = []
 
-    for mask_thickness in mask_thickness_levels:
-        all_metrics = []
-        for pairs_file in pairs_files:
-            pairs_file_path = os.path.join(pairs_files_base, pairs_file)
-            y_true, y_pred_scores = evaluate_lfw(model, dataset_dir, pairs_file_path, mask_thickness)
-            metrics = calculate_metrics(y_true, y_pred_scores, fixed_threshold)
-            all_metrics.append(metrics)
-            result = calculate_metrics(y_true, y_pred_scores, fixed_threshold)
-            if isinstance(result, dict):
-                all_metrics.append(result)
-                accuracy = result['accuracy']
-                precision = result['precision']
-                recall = result['recall']
-                f1 = result['f1']
-            else:
-                print("Unexpected result type:", type(result))
-            # Extract metrics from the returned dictionary
-            #accuracy = metrics['accuracy']
-            #precision = metrics['precision']
-            #recall = metrics['recall']
-            #f1 = metrics['f1']
+            pair_acc = []
+            pair_precision = []
+            pair_recall = []
+            pair_f1 = []
 
-            # Print summary for the current pairs file
-            print(f"Summary for {pairs_file} with {mask_thickness} :")
-            print(f"  Accuracy: {accuracy:.4f}")
-            print(f"  Precision: {precision:.4f}")
-            print(f"  Recall: {recall:.4f}")
-            print(f"  F1 Score: {f1:.4f}\n")
+            for pairs_file in pairs_files:
+                pairs_file_path = os.path.join(pairs_files_base, pairs_file)
+                y_true, y_pred_scores = evaluate_lfw(model, dataset_dir, pairs_file_path, mask_thickness)
+                metrics = calculate_metrics(y_true, y_pred_scores, th)
+                all_metrics.append(metrics)
 
-        # Calculate average metrics for this noise level
-        for metric in ['accuracy', 'precision', 'recall', 'f1']:
-            metric_values = [m[metric] for m in all_metrics]
-            avg_metrics[mask_thickness][metric] = np.mean(metric_values)
-    save_directory = "black-masking_plot"
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
+                # Extract metrics from the returned dictionary
+                accuracy = metrics['accuracy']
+                precision = metrics['precision']
+                recall = metrics['recall']
+                f1 = metrics['f1']
 
-    for metric_name in ['accuracy', 'precision', 'recall', 'f1']:
-        plt.figure()
-        thickness_factors = list(mask_thickness_levels)
-        metric_values = [avg_metrics[thickness][metric_name] for thickness in thickness_factors]
-        plt.plot(thickness_factors, metric_values, marker='o', linestyle='-')
-        plt.title(f"{metric_name.capitalize()} vs. Mask Thickness")
-        plt.xlabel("Mask Thickness")
-        plt.ylabel(metric_name.capitalize())
-        plt.grid(True)
-        plt.savefig(os.path.join(save_directory, f"{metric_name}_vs_mask_thickness.png"))
-        plt.close()
+                pair_acc.append(accuracy)
+                pair_precision.append(precision)
+                pair_recall.append(recall)
+                pair_f1.append(f1)
+
+                print(f"  Accuracy: {mean(pair_acc):.4f}")
+                print(f"  Precision: {mean(pair_precision):.4f}")
+                print(f"  Recall: {mean(pair_recall):.4f}")
+                print(f"  F1 Score: {mean(pair_f1):.4f}\n")
+
+
+            # Calculate average metrics for this noise level
+            for metric in ['accuracy', 'precision', 'recall', 'f1']:
+                metric_values = [m[metric] for m in all_metrics]
+                avg_metrics[mask_thickness][metric] = np.mean(metric_values)
+
+        save_directory = "threshold-black-masking_plot"
+        if not os.path.exists(save_directory):
+            os.makedirs(save_directory)
+
+        for metric_name in ['accuracy', 'precision', 'recall', 'f1']:
+            plt.figure()
+            thickness_factors = list(mask_thickness_levels)
+            metric_values = [avg_metrics[thickness][metric_name] for thickness in thickness_factors]
+            plt.plot(thickness_factors, metric_values, marker='o', linestyle='-')
+            plt.title(f"{metric_name.capitalize()} vs. Mask Thickness")
+            plt.xlabel("Mask Thickness")
+            plt.ylabel(metric_name.capitalize())
+            plt.grid(True)
+            plt.savefig(os.path.join(save_directory, f"{metric_name}_vs_mask_thickness_at_{th:.2f}_threshold.png"))
+            plt.close()
 #make it noisy 
 """
 def main():

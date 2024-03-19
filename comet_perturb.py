@@ -70,7 +70,7 @@ def evaluate_lfw(model, dataset_dir, pairs_file_path, noise_factor):
 
     return np.array(labels), np.array(similarities)
 
-def calculate_metrics(labels, similarities, threshold=65):
+def calculate_metrics(labels, similarities, threshold):
     predictions = similarities >= threshold
     tp = np.sum((predictions == 1) & (labels == 1))
     tn = np.sum((predictions == 0) & (labels == 0))
@@ -118,7 +118,7 @@ def main():
 
     avg_metrics = {noise: {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} for noise in noise_levels}
 
-    for th in np.linspace(0.3,0.95,0.05):
+    for th in np.linspace(0.3,1,num=14):
         for noise_factor in noise_levels:
             all_metrics = []
 
@@ -130,7 +130,7 @@ def main():
             for pairs_file in pairs_files:
                 pairs_file_path = os.path.join(pairs_files_base, pairs_file)
                 y_true, y_pred_scores = evaluate_lfw(model, dataset_dir, pairs_file_path, noise_factor=noise_factor)
-                metrics = calculate_metrics(y_true, y_pred_scores)  # ensure this returns a dict
+                metrics = calculate_metrics(y_true, y_pred_scores,th)  # ensure this returns a dict
                 all_metrics.append(metrics)
 
                 # Extract metrics from the returned dictionary
@@ -139,7 +139,7 @@ def main():
                 recall = metrics['recall']
                 f1 = metrics['f1']
 
-                pair_acc.append(acc)
+                pair_acc.append(accuracy)
                 pair_precision.append(precision)
                 pair_recall.append(recall)
                 pair_f1.append(f1)
