@@ -1,0 +1,917 @@
+Defaulting to user installation because normal site-packages is not writeable
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2020/avx2, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo/avx2, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2020/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: tensorflow==2.8 in /home/yaldaw/.local/lib/python3.10/site-packages (2.8.0+computecanada)
+Requirement already satisfied: protobuf>=3.9.2 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (3.20.3+computecanada)
+Requirement already satisfied: gast>=0.2.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (0.5.4+computecanada)
+Requirement already satisfied: keras-preprocessing>=1.1.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (1.1.2+computecanada)
+Requirement already satisfied: opt-einsum>=2.3.2 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (3.3.0+computecanada)
+Requirement already satisfied: typing-extensions>=3.6.6 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (4.10.0+computecanada)
+Requirement already satisfied: astunparse>=1.6.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (1.6.3+computecanada)
+Requirement already satisfied: numpy>=1.20 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (1.25.2+computecanada)
+Requirement already satisfied: h5py>=2.9.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (3.8.0+computecanada)
+Requirement already satisfied: keras<2.9,>=2.8.0rc0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (2.8.0+computecanada)
+Requirement already satisfied: grpcio<2.0,>=1.24.3 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (1.57.0+computecanada)
+Requirement already satisfied: absl-py>=0.4.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (1.4.0+computecanada)
+Requirement already satisfied: libclang>=9.0.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (14.0.1+computecanada)
+Requirement already satisfied: termcolor>=1.1.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (2.4.0+computecanada)
+Requirement already satisfied: six>=1.12.0 in /cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.10.2/lib/python3.10/site-packages (from tensorflow==2.8) (1.16.0)
+Requirement already satisfied: google-pasta>=0.1.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (0.2.0+computecanada)
+Requirement already satisfied: wrapt>=1.11.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (1.14.1+computecanada)
+Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (0.32.0+computecanada)
+Requirement already satisfied: setuptools in /cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.10.2/lib/python3.10/site-packages (from tensorflow==2.8) (60.7.1)
+Requirement already satisfied: tensorboard<2.9,>=2.8 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (2.8.0+computecanada)
+Requirement already satisfied: tf-estimator-nightly==2.8.0.dev2021122109 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (2.8.0.dev2021122109+computecanada)
+Requirement already satisfied: flatbuffers>=1.12 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorflow==2.8) (20190709135844+computecanada)
+Requirement already satisfied: wheel<1.0,>=0.23.0 in /cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.10.2/lib/python3.10/site-packages (from astunparse>=1.6.0->tensorflow==2.8) (0.37.1)
+Requirement already satisfied: requests<3,>=2.21.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorboard<2.9,>=2.8->tensorflow==2.8) (2.31.0+computecanada)
+Requirement already satisfied: google-auth-oauthlib<0.5,>=0.4.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorboard<2.9,>=2.8->tensorflow==2.8) (0.4.6+computecanada)
+Requirement already satisfied: tensorboard-plugin-wit>=1.6.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorboard<2.9,>=2.8->tensorflow==2.8) (1.8.1+computecanada)
+Requirement already satisfied: werkzeug>=0.11.15 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorboard<2.9,>=2.8->tensorflow==2.8) (3.0.1+computecanada)
+Requirement already satisfied: markdown>=2.6.8 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorboard<2.9,>=2.8->tensorflow==2.8) (3.5.2+computecanada)
+Requirement already satisfied: tensorboard-data-server<0.7.0,>=0.6.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorboard<2.9,>=2.8->tensorflow==2.8) (0.6.1+computecanada)
+Requirement already satisfied: google-auth<3,>=1.6.3 in /home/yaldaw/.local/lib/python3.10/site-packages (from tensorboard<2.9,>=2.8->tensorflow==2.8) (2.28.2)
+Requirement already satisfied: cachetools<6.0,>=2.0.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow==2.8) (5.3.3)
+Requirement already satisfied: pyasn1-modules>=0.2.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow==2.8) (0.3.0+computecanada)
+Requirement already satisfied: rsa<5,>=3.1.4 in /home/yaldaw/.local/lib/python3.10/site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow==2.8) (4.9+computecanada)
+Requirement already satisfied: requests-oauthlib>=0.7.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.9,>=2.8->tensorflow==2.8) (1.4.0)
+Requirement already satisfied: charset-normalizer<4,>=2 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow==2.8) (3.3.2)
+Requirement already satisfied: idna<4,>=2.5 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow==2.8) (3.6)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow==2.8) (2.0.7+computecanada)
+Requirement already satisfied: certifi>=2017.4.17 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow==2.8) (2024.2.2)
+Requirement already satisfied: MarkupSafe>=2.1.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from werkzeug>=0.11.15->tensorboard<2.9,>=2.8->tensorflow==2.8) (2.1.3+computecanada)
+Requirement already satisfied: pyasn1<0.6.0,>=0.4.6 in /home/yaldaw/.local/lib/python3.10/site-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow==2.8) (0.5.1+computecanada)
+Requirement already satisfied: oauthlib>=3.0.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.9,>=2.8->tensorflow==2.8) (3.2.2+computecanada)
+Defaulting to user installation because normal site-packages is not writeable
+Looking in links: /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2020/avx2, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo/avx2, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2020/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo/generic, /cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic
+Requirement already satisfied: comet_ml in /home/yaldaw/.local/lib/python3.10/site-packages (3.35.4+computecanada)
+Requirement already satisfied: urllib3>=1.21.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (2.0.7+computecanada)
+Requirement already satisfied: sentry-sdk>=1.1.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (1.40.6)
+Requirement already satisfied: rich>=13.3.2 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (13.7.1+computecanada)
+Requirement already satisfied: requests-toolbelt>=0.8.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (1.0.0+computecanada)
+Requirement already satisfied: simplejson in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (3.19.2+computecanada)
+Requirement already satisfied: dulwich!=0.20.33,>=0.20.6 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (0.21.3+computecanada)
+Requirement already satisfied: jsonschema!=3.1.0,>=2.6.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (4.21.1+computecanada)
+Requirement already satisfied: wurlitzer>=1.0.2 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (3.0.3+computecanada)
+Requirement already satisfied: six in /cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.10.2/lib/python3.10/site-packages (from comet_ml) (1.16.0)
+Requirement already satisfied: psutil>=5.6.3 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (5.9.8)
+Requirement already satisfied: websocket-client<1.4.0,>=0.55.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (1.3.3+computecanada)
+Requirement already satisfied: requests>=2.18.4 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (2.31.0+computecanada)
+Requirement already satisfied: python-box<7.0.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (6.1.0+computecanada)
+Requirement already satisfied: semantic-version>=2.8.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (2.10.0+computecanada)
+Requirement already satisfied: wrapt>=1.11.2 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (1.14.1+computecanada)
+Requirement already satisfied: everett[ini]<3.2.0,>=1.0.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from comet_ml) (3.1.0+computecanada)
+Requirement already satisfied: configobj in /home/yaldaw/.local/lib/python3.10/site-packages (from everett[ini]<3.2.0,>=1.0.1->comet_ml) (5.0.8+computecanada)
+Requirement already satisfied: referencing>=0.28.4 in /home/yaldaw/.local/lib/python3.10/site-packages (from jsonschema!=3.1.0,>=2.6.0->comet_ml) (0.33.0+computecanada)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in /home/yaldaw/.local/lib/python3.10/site-packages (from jsonschema!=3.1.0,>=2.6.0->comet_ml) (2023.12.1+computecanada)
+Requirement already satisfied: attrs>=22.2.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from jsonschema!=3.1.0,>=2.6.0->comet_ml) (23.2.0+computecanada)
+Requirement already satisfied: rpds-py>=0.7.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from jsonschema!=3.1.0,>=2.6.0->comet_ml) (0.10.0+computecanada)
+Requirement already satisfied: idna<4,>=2.5 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests>=2.18.4->comet_ml) (3.6)
+Requirement already satisfied: charset-normalizer<4,>=2 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests>=2.18.4->comet_ml) (3.3.2)
+Requirement already satisfied: certifi>=2017.4.17 in /home/yaldaw/.local/lib/python3.10/site-packages (from requests>=2.18.4->comet_ml) (2024.2.2)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from rich>=13.3.2->comet_ml) (2.17.2+computecanada)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /home/yaldaw/.local/lib/python3.10/site-packages (from rich>=13.3.2->comet_ml) (3.0.0+computecanada)
+Requirement already satisfied: mdurl~=0.1 in /home/yaldaw/.local/lib/python3.10/site-packages (from markdown-it-py>=2.2.0->rich>=13.3.2->comet_ml) (0.1.2+computecanada)
+COMET INFO: Experiment is live on comet.com https://www.comet.com/enhancing-gradient/random-square-masking-effect/d80c54769b1c4ec5bf4ae7d6e8f8f1cb
+
+2024-03-19 03:57:29.643469: I tensorflow/core/platform/cpu_feature_guard.cc:151] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-03-19 03:57:30.684155: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1525] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 38212 MB memory:  -> device: 0, name: NVIDIA A100-SXM4-40GB, pci bus id: 0000:81:00.0, compute capability: 8.0
+WARNING:tensorflow:No training configuration found in the save file, so the model was *not* compiled. Compile it manually.
+2024-03-19 03:57:35.458820: I tensorflow/stream_executor/cuda/cuda_dnn.cc:368] Loaded cuDNN version 8200
+2024-03-19 03:57:36.208748: I tensorflow/core/platform/default/subprocess.cc:304] Start cannot spawn child process: No such file or directory
+2024-03-19 03:57:36.209249: I tensorflow/core/platform/default/subprocess.cc:304] Start cannot spawn child process: No such file or directory
+2024-03-19 03:57:36.209266: W tensorflow/stream_executor/gpu/asm_compiler.cc:80] Couldn't get ptxas version string: INTERNAL: Couldn't invoke ptxas --version
+2024-03-19 03:57:36.209972: I tensorflow/core/platform/default/subprocess.cc:304] Start cannot spawn child process: No such file or directory
+2024-03-19 03:57:36.210019: W tensorflow/stream_executor/gpu/redzone_allocator.cc:314] INTERNAL: Failed to launch ptxas
+Relying on driver to perform ptx compilation. 
+Modify $PATH to customize ptxas location.
+This message will be only logged once.
+Summary for pairs_01.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5243
+  Recall: 0.9700
+  F1 Score: 0.6807
+
+Summary for pairs_02.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5400
+  Precision: 0.5222
+  Recall: 0.9400
+  F1 Score: 0.6714
+
+Summary for pairs_03.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5500
+  Precision: 0.5274
+  Recall: 0.9633
+  F1 Score: 0.6816
+
+Summary for pairs_04.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5567
+  Precision: 0.5316
+  Recall: 0.9533
+  F1 Score: 0.6826
+
+Summary for pairs_05.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5500
+  Precision: 0.5281
+  Recall: 0.9400
+  F1 Score: 0.6763
+
+Summary for pairs_06.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5333
+  Precision: 0.5178
+  Recall: 0.9700
+  F1 Score: 0.6752
+
+Summary for pairs_07.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5483
+  Precision: 0.5265
+  Recall: 0.9600
+  F1 Score: 0.6800
+
+Summary for pairs_08.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5583
+  Precision: 0.5318
+  Recall: 0.9767
+  F1 Score: 0.6886
+
+Summary for pairs_09.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5245
+  Recall: 0.9633
+  F1 Score: 0.6792
+
+Summary for pairs_10.txt with 1 masks 0.3 threshold:
+  Accuracy: 0.5550
+  Precision: 0.5294
+  Recall: 0.9900
+  F1 Score: 0.6899
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5500
+  Precision: 0.5275
+  Recall: 0.9600
+  F1 Score: 0.6809
+
+Summary for pairs_02.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5650
+  Precision: 0.5366
+  Recall: 0.9533
+  F1 Score: 0.6867
+
+Summary for pairs_03.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5583
+  Precision: 0.5326
+  Recall: 0.9533
+  F1 Score: 0.6834
+
+Summary for pairs_04.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5667
+  Precision: 0.5382
+  Recall: 0.9400
+  F1 Score: 0.6845
+
+Summary for pairs_05.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5333
+  Precision: 0.5190
+  Recall: 0.9100
+  F1 Score: 0.6610
+
+Summary for pairs_06.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5467
+  Precision: 0.5259
+  Recall: 0.9467
+  F1 Score: 0.6762
+
+Summary for pairs_07.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5833
+  Precision: 0.5477
+  Recall: 0.9567
+  F1 Score: 0.6966
+
+Summary for pairs_08.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5517
+  Precision: 0.5293
+  Recall: 0.9333
+  F1 Score: 0.6755
+
+Summary for pairs_09.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5633
+  Precision: 0.5360
+  Recall: 0.9433
+  F1 Score: 0.6836
+
+Summary for pairs_10.txt with 2 masks 0.3 threshold:
+  Accuracy: 0.5683
+  Precision: 0.5385
+  Recall: 0.9567
+  F1 Score: 0.6891
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5617
+  Precision: 0.5350
+  Recall: 0.9433
+  F1 Score: 0.6828
+
+Summary for pairs_02.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5650
+  Precision: 0.5392
+  Recall: 0.8933
+  F1 Score: 0.6725
+
+Summary for pairs_03.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5517
+  Precision: 0.5296
+  Recall: 0.9233
+  F1 Score: 0.6731
+
+Summary for pairs_04.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5717
+  Precision: 0.5416
+  Recall: 0.9333
+  F1 Score: 0.6854
+
+Summary for pairs_05.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5550
+  Precision: 0.5325
+  Recall: 0.9000
+  F1 Score: 0.6691
+
+Summary for pairs_06.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5417
+  Precision: 0.5234
+  Recall: 0.9333
+  F1 Score: 0.6707
+
+Summary for pairs_07.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5517
+  Precision: 0.5293
+  Recall: 0.9333
+  F1 Score: 0.6755
+
+Summary for pairs_08.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5550
+  Precision: 0.5311
+  Recall: 0.9400
+  F1 Score: 0.6787
+
+Summary for pairs_09.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5500
+  Precision: 0.5290
+  Recall: 0.9133
+  F1 Score: 0.6699
+
+Summary for pairs_10.txt with 3 masks 0.3 threshold:
+  Accuracy: 0.5583
+  Precision: 0.5337
+  Recall: 0.9233
+  F1 Score: 0.6764
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5567
+  Precision: 0.5320
+  Recall: 0.9433
+  F1 Score: 0.6803
+
+Summary for pairs_02.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5633
+  Precision: 0.5380
+  Recall: 0.8967
+  F1 Score: 0.6725
+
+Summary for pairs_03.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5567
+  Precision: 0.5327
+  Recall: 0.9233
+  F1 Score: 0.6756
+
+Summary for pairs_04.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5667
+  Precision: 0.5394
+  Recall: 0.9133
+  F1 Score: 0.6782
+
+Summary for pairs_05.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5650
+  Precision: 0.5392
+  Recall: 0.8933
+  F1 Score: 0.6725
+
+Summary for pairs_06.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5483
+  Precision: 0.5291
+  Recall: 0.8800
+  F1 Score: 0.6608
+
+Summary for pairs_07.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5583
+  Precision: 0.5347
+  Recall: 0.9000
+  F1 Score: 0.6708
+
+Summary for pairs_08.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5517
+  Precision: 0.5303
+  Recall: 0.9033
+  F1 Score: 0.6683
+
+Summary for pairs_09.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5633
+  Precision: 0.5377
+  Recall: 0.9033
+  F1 Score: 0.6741
+
+Summary for pairs_10.txt with 4 masks 0.3 threshold:
+  Accuracy: 0.5900
+  Precision: 0.5534
+  Recall: 0.9333
+  F1 Score: 0.6948
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.562, 'precision': 0.5366355045214851, 'recall': 0.909, 'f1': 0.6748000645331655} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5567
+  Precision: 0.5328
+  Recall: 0.9200
+  F1 Score: 0.6748
+
+Summary for pairs_02.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5183
+  Precision: 0.5106
+  Recall: 0.8833
+  F1 Score: 0.6471
+
+Summary for pairs_03.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5256
+  Recall: 0.9233
+  F1 Score: 0.6699
+
+Summary for pairs_04.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5400
+  Precision: 0.5233
+  Recall: 0.8967
+  F1 Score: 0.6609
+
+Summary for pairs_05.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5317
+  Precision: 0.5183
+  Recall: 0.8967
+  F1 Score: 0.6569
+
+Summary for pairs_06.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5850
+  Precision: 0.5507
+  Recall: 0.9233
+  F1 Score: 0.6899
+
+Summary for pairs_07.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5633
+  Precision: 0.5365
+  Recall: 0.9300
+  F1 Score: 0.6805
+
+Summary for pairs_08.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5567
+  Precision: 0.5329
+  Recall: 0.9167
+  F1 Score: 0.6740
+
+Summary for pairs_09.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5567
+  Precision: 0.5336
+  Recall: 0.9000
+  F1 Score: 0.6700
+
+Summary for pairs_10.txt with 5 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5266
+  Recall: 0.8900
+  F1 Score: 0.6617
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.562, 'precision': 0.5366355045214851, 'recall': 0.909, 'f1': 0.6748000645331655} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5498333333333333, 'precision': 0.5291087348618592, 'recall': 0.908, 'f1': 0.6685776226693236} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5258
+  Recall: 0.9167
+  F1 Score: 0.6683
+
+Summary for pairs_02.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5217
+  Precision: 0.5134
+  Recall: 0.8300
+  F1 Score: 0.6344
+
+Summary for pairs_03.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5317
+  Precision: 0.5180
+  Recall: 0.9100
+  F1 Score: 0.6602
+
+Summary for pairs_04.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5533
+  Precision: 0.5310
+  Recall: 0.9133
+  F1 Score: 0.6716
+
+Summary for pairs_05.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5300
+  Precision: 0.5183
+  Recall: 0.8500
+  F1 Score: 0.6439
+
+Summary for pairs_06.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5300
+  Precision: 0.5173
+  Recall: 0.8967
+  F1 Score: 0.6561
+
+Summary for pairs_07.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5467
+  Precision: 0.5270
+  Recall: 0.9100
+  F1 Score: 0.6675
+
+Summary for pairs_08.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5200
+  Precision: 0.5115
+  Recall: 0.8900
+  F1 Score: 0.6496
+
+Summary for pairs_09.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5667
+  Precision: 0.5397
+  Recall: 0.9067
+  F1 Score: 0.6766
+
+Summary for pairs_10.txt with 6 masks 0.3 threshold:
+  Accuracy: 0.5383
+  Precision: 0.5227
+  Recall: 0.8833
+  F1 Score: 0.6568
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.562, 'precision': 0.5366355045214851, 'recall': 0.909, 'f1': 0.6748000645331655} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5498333333333333, 'precision': 0.5291087348618592, 'recall': 0.908, 'f1': 0.6685776226693236} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5383333333333333, 'precision': 0.5224735639338439, 'recall': 0.8906666666666666, 'f1': 0.6584991918961554} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5433
+  Precision: 0.5249
+  Recall: 0.9133
+  F1 Score: 0.6667
+
+Summary for pairs_02.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5300
+  Precision: 0.5174
+  Recall: 0.8900
+  F1 Score: 0.6544
+
+Summary for pairs_03.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5533
+  Precision: 0.5315
+  Recall: 0.9000
+  F1 Score: 0.6683
+
+Summary for pairs_04.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5417
+  Precision: 0.5250
+  Recall: 0.8767
+  F1 Score: 0.6567
+
+Summary for pairs_05.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5268
+  Recall: 0.8833
+  F1 Score: 0.6600
+
+Summary for pairs_06.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5350
+  Precision: 0.5202
+  Recall: 0.9033
+  F1 Score: 0.6602
+
+Summary for pairs_07.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5467
+  Precision: 0.5275
+  Recall: 0.8967
+  F1 Score: 0.6642
+
+Summary for pairs_08.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5400
+  Precision: 0.5231
+  Recall: 0.9067
+  F1 Score: 0.6634
+
+Summary for pairs_09.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5433
+  Precision: 0.5254
+  Recall: 0.8967
+  F1 Score: 0.6626
+
+Summary for pairs_10.txt with 7 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5266
+  Recall: 0.8900
+  F1 Score: 0.6617
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.562, 'precision': 0.5366355045214851, 'recall': 0.909, 'f1': 0.6748000645331655} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5498333333333333, 'precision': 0.5291087348618592, 'recall': 0.908, 'f1': 0.6685776226693236} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5383333333333333, 'precision': 0.5224735639338439, 'recall': 0.8906666666666666, 'f1': 0.6584991918961554} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5423333333333333, 'precision': 0.5248330502287527, 'recall': 0.8956666666666667, 'f1': 0.6618153623008602} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5483
+  Precision: 0.5269
+  Recall: 0.9467
+  F1 Score: 0.6770
+
+Summary for pairs_02.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5350
+  Precision: 0.5204
+  Recall: 0.8933
+  F1 Score: 0.6577
+
+Summary for pairs_03.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5517
+  Precision: 0.5296
+  Recall: 0.9233
+  F1 Score: 0.6731
+
+Summary for pairs_04.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5417
+  Precision: 0.5240
+  Recall: 0.9100
+  F1 Score: 0.6650
+
+Summary for pairs_05.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5250
+  Precision: 0.5143
+  Recall: 0.9000
+  F1 Score: 0.6545
+
+Summary for pairs_06.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5367
+  Precision: 0.5210
+  Recall: 0.9100
+  F1 Score: 0.6626
+
+Summary for pairs_07.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5150
+  Precision: 0.5089
+  Recall: 0.8600
+  F1 Score: 0.6394
+
+Summary for pairs_08.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5350
+  Precision: 0.5202
+  Recall: 0.9033
+  F1 Score: 0.6602
+
+Summary for pairs_09.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5067
+  Precision: 0.5038
+  Recall: 0.8900
+  F1 Score: 0.6434
+
+Summary for pairs_10.txt with 8 masks 0.3 threshold:
+  Accuracy: 0.5383
+  Precision: 0.5222
+  Recall: 0.9033
+  F1 Score: 0.6618
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.562, 'precision': 0.5366355045214851, 'recall': 0.909, 'f1': 0.6748000645331655} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5498333333333333, 'precision': 0.5291087348618592, 'recall': 0.908, 'f1': 0.6685776226693236} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5383333333333333, 'precision': 0.5224735639338439, 'recall': 0.8906666666666666, 'f1': 0.6584991918961554} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5423333333333333, 'precision': 0.5248330502287527, 'recall': 0.8956666666666667, 'f1': 0.6618153623008602} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5333333333333333, 'precision': 0.5191158005269978, 'recall': 0.9039999999999999, 'f1': 0.6594753487735062} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.4983
+  Precision: 0.4991
+  Recall: 0.9067
+  F1 Score: 0.6438
+
+Summary for pairs_02.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5400
+  Precision: 0.5230
+  Recall: 0.9100
+  F1 Score: 0.6642
+
+Summary for pairs_03.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5167
+  Precision: 0.5095
+  Recall: 0.8933
+  F1 Score: 0.6489
+
+Summary for pairs_04.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5350
+  Precision: 0.5194
+  Recall: 0.9367
+  F1 Score: 0.6683
+
+Summary for pairs_05.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5200
+  Precision: 0.5112
+  Recall: 0.9100
+  F1 Score: 0.6547
+
+Summary for pairs_06.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5150
+  Precision: 0.5085
+  Recall: 0.8967
+  F1 Score: 0.6490
+
+Summary for pairs_07.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5233
+  Precision: 0.5127
+  Recall: 0.9400
+  F1 Score: 0.6635
+
+Summary for pairs_08.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5450
+  Precision: 0.5250
+  Recall: 0.9467
+  F1 Score: 0.6754
+
+Summary for pairs_09.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5183
+  Precision: 0.5105
+  Recall: 0.8900
+  F1 Score: 0.6488
+
+Summary for pairs_10.txt with 9 masks 0.3 threshold:
+  Accuracy: 0.5283
+  Precision: 0.5159
+  Recall: 0.9200
+  F1 Score: 0.6611
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.562, 'precision': 0.5366355045214851, 'recall': 0.909, 'f1': 0.6748000645331655} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5498333333333333, 'precision': 0.5291087348618592, 'recall': 0.908, 'f1': 0.6685776226693236} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5383333333333333, 'precision': 0.5224735639338439, 'recall': 0.8906666666666666, 'f1': 0.6584991918961554} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5423333333333333, 'precision': 0.5248330502287527, 'recall': 0.8956666666666667, 'f1': 0.6618153623008602} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5333333333333333, 'precision': 0.5191158005269978, 'recall': 0.9039999999999999, 'f1': 0.6594753487735062} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.524, 'precision': 0.5134813016926163, 'recall': 0.915, 'f1': 0.6577673365934613} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Summary for pairs_01.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5083
+  Precision: 0.5047
+  Recall: 0.8967
+  F1 Score: 0.6459
+
+Summary for pairs_02.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5317
+  Precision: 0.5178
+  Recall: 0.9233
+  F1 Score: 0.6635
+
+Summary for pairs_03.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5300
+  Precision: 0.5171
+  Recall: 0.9067
+  F1 Score: 0.6586
+
+Summary for pairs_04.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5333
+  Precision: 0.5187
+  Recall: 0.9233
+  F1 Score: 0.6643
+
+Summary for pairs_05.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5133
+  Precision: 0.5076
+  Recall: 0.8933
+  F1 Score: 0.6473
+
+Summary for pairs_06.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5283
+  Precision: 0.5160
+  Recall: 0.9133
+  F1 Score: 0.6594
+
+Summary for pairs_07.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5117
+  Precision: 0.5064
+  Recall: 0.9233
+  F1 Score: 0.6541
+
+Summary for pairs_08.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5333
+  Precision: 0.5192
+  Recall: 0.9000
+  F1 Score: 0.6585
+
+Summary for pairs_09.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5083
+  Precision: 0.5046
+  Recall: 0.9067
+  F1 Score: 0.6484
+
+Summary for pairs_10.txt with 10 masks 0.3 threshold:
+  Accuracy: 0.5283
+  Precision: 0.5158
+  Recall: 0.9267
+  F1 Score: 0.6627
+
+COMET WARNING: Cannot safely convert {'accuracy': 0.5481666666666667, 'precision': 0.526358213868755, 'recall': 0.9626666666666667, 'f1': 0.6805489952837706} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5586666666666666, 'precision': 0.533120849712194, 'recall': 0.9453333333333334, 'f1': 0.6817357366037285} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5561666666666667, 'precision': 0.5324388938729914, 'recall': 0.9236666666666669, 'f1': 0.6754231816240427} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.562, 'precision': 0.5366355045214851, 'recall': 0.909, 'f1': 0.6748000645331655} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5498333333333333, 'precision': 0.5291087348618592, 'recall': 0.908, 'f1': 0.6685776226693236} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5383333333333333, 'precision': 0.5224735639338439, 'recall': 0.8906666666666666, 'f1': 0.6584991918961554} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5423333333333333, 'precision': 0.5248330502287527, 'recall': 0.8956666666666667, 'f1': 0.6618153623008602} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5333333333333333, 'precision': 0.5191158005269978, 'recall': 0.9039999999999999, 'f1': 0.6594753487735062} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.524, 'precision': 0.5134813016926163, 'recall': 0.915, 'f1': 0.6577673365934613} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+COMET WARNING: Cannot safely convert {'accuracy': 0.5226666666666666, 'precision': 0.5127905059291156, 'recall': 0.9113333333333331, 'f1': 0.6562679478683822} object to a scalar value, using its string representation for logging. Resulting string might be invalid
+Traceback (most recent call last):
+  File "/home/yaldaw/working_dir/yalda/ghostfacenet-ex/random-masking.py", line 177, in <module>
+    main()
+  File "/home/yaldaw/working_dir/yalda/ghostfacenet-ex/random-masking.py", line 166, in main
+    plt.plot(x, y, marker='o', linestyle='-')
+  File "/home/yaldaw/.local/lib/python3.10/site-packages/matplotlib/pyplot.py", line 2812, in plot
+    return gca().plot(
+  File "/home/yaldaw/.local/lib/python3.10/site-packages/matplotlib/axes/_axes.py", line 1688, in plot
+    lines = [*self._get_lines(*args, data=data, **kwargs)]
+  File "/home/yaldaw/.local/lib/python3.10/site-packages/matplotlib/axes/_base.py", line 311, in __call__
+    yield from self._plot_args(
+  File "/home/yaldaw/.local/lib/python3.10/site-packages/matplotlib/axes/_base.py", line 504, in _plot_args
+    raise ValueError(f"x and y must have same first dimension, but "
+ValueError: x and y must have same first dimension, but have shapes (0,) and (10,)
+COMET INFO: ---------------------------------------------------------------------------------------
+COMET INFO: Comet.ml Experiment Summary
+COMET INFO: ---------------------------------------------------------------------------------------
+COMET INFO:   Data:
+COMET INFO:     display_summary_level : 1
+COMET INFO:     url                   : https://www.comet.com/enhancing-gradient/random-square-masking-effect/d80c54769b1c4ec5bf4ae7d6e8f8f1cb
+COMET INFO:   Metrics:
+COMET INFO:     masks_10_1  : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_10_10 : {"accuracy": 0.5226666666666666, "f1": 0.6562679478683822, "precision": 0.5127905059291156, "recall": 0.9113333333333331}
+COMET INFO:     masks_10_2  : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_10_3  : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_10_4  : {"accuracy": 0.562, "f1": 0.6748000645331655, "precision": 0.5366355045214851, "recall": 0.909}
+COMET INFO:     masks_10_5  : {"accuracy": 0.5498333333333333, "f1": 0.6685776226693236, "precision": 0.5291087348618592, "recall": 0.908}
+COMET INFO:     masks_10_6  : {"accuracy": 0.5383333333333333, "f1": 0.6584991918961554, "precision": 0.5224735639338439, "recall": 0.8906666666666666}
+COMET INFO:     masks_10_7  : {"accuracy": 0.5423333333333333, "f1": 0.6618153623008602, "precision": 0.5248330502287527, "recall": 0.8956666666666667}
+COMET INFO:     masks_10_8  : {"accuracy": 0.5333333333333333, "f1": 0.6594753487735062, "precision": 0.5191158005269978, "recall": 0.9039999999999999}
+COMET INFO:     masks_10_9  : {"accuracy": 0.524, "f1": 0.6577673365934613, "precision": 0.5134813016926163, "recall": 0.915}
+COMET INFO:     masks_1_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_1_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_2   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_3   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_4   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_5   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_6   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_7   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_8   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_1_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_2_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_2_3   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_4   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_5   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_6   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_7   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_8   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_2_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_3_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_3_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_3_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_3_3   : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_3_4   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_3_5   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_3_6   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_3_7   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_3_8   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_3_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_4_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_4_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_4_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_4_3   : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_4_4   : {"accuracy": 0.562, "f1": 0.6748000645331655, "precision": 0.5366355045214851, "recall": 0.909}
+COMET INFO:     masks_4_5   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_4_6   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_4_7   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_4_8   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_4_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_5_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_5_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_5_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_5_3   : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_5_4   : {"accuracy": 0.562, "f1": 0.6748000645331655, "precision": 0.5366355045214851, "recall": 0.909}
+COMET INFO:     masks_5_5   : {"accuracy": 0.5498333333333333, "f1": 0.6685776226693236, "precision": 0.5291087348618592, "recall": 0.908}
+COMET INFO:     masks_5_6   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_5_7   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_5_8   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_5_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_6_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_6_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_6_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_6_3   : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_6_4   : {"accuracy": 0.562, "f1": 0.6748000645331655, "precision": 0.5366355045214851, "recall": 0.909}
+COMET INFO:     masks_6_5   : {"accuracy": 0.5498333333333333, "f1": 0.6685776226693236, "precision": 0.5291087348618592, "recall": 0.908}
+COMET INFO:     masks_6_6   : {"accuracy": 0.5383333333333333, "f1": 0.6584991918961554, "precision": 0.5224735639338439, "recall": 0.8906666666666666}
+COMET INFO:     masks_6_7   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_6_8   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_6_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_7_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_7_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_7_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_7_3   : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_7_4   : {"accuracy": 0.562, "f1": 0.6748000645331655, "precision": 0.5366355045214851, "recall": 0.909}
+COMET INFO:     masks_7_5   : {"accuracy": 0.5498333333333333, "f1": 0.6685776226693236, "precision": 0.5291087348618592, "recall": 0.908}
+COMET INFO:     masks_7_6   : {"accuracy": 0.5383333333333333, "f1": 0.6584991918961554, "precision": 0.5224735639338439, "recall": 0.8906666666666666}
+COMET INFO:     masks_7_7   : {"accuracy": 0.5423333333333333, "f1": 0.6618153623008602, "precision": 0.5248330502287527, "recall": 0.8956666666666667}
+COMET INFO:     masks_7_8   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_7_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_8_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_8_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_8_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_8_3   : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_8_4   : {"accuracy": 0.562, "f1": 0.6748000645331655, "precision": 0.5366355045214851, "recall": 0.909}
+COMET INFO:     masks_8_5   : {"accuracy": 0.5498333333333333, "f1": 0.6685776226693236, "precision": 0.5291087348618592, "recall": 0.908}
+COMET INFO:     masks_8_6   : {"accuracy": 0.5383333333333333, "f1": 0.6584991918961554, "precision": 0.5224735639338439, "recall": 0.8906666666666666}
+COMET INFO:     masks_8_7   : {"accuracy": 0.5423333333333333, "f1": 0.6618153623008602, "precision": 0.5248330502287527, "recall": 0.8956666666666667}
+COMET INFO:     masks_8_8   : {"accuracy": 0.5333333333333333, "f1": 0.6594753487735062, "precision": 0.5191158005269978, "recall": 0.9039999999999999}
+COMET INFO:     masks_8_9   : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_9_1   : {"accuracy": 0.5481666666666667, "f1": 0.6805489952837706, "precision": 0.526358213868755, "recall": 0.9626666666666667}
+COMET INFO:     masks_9_10  : {"accuracy": [], "f1": [], "precision": [], "recall": []}
+COMET INFO:     masks_9_2   : {"accuracy": 0.5586666666666666, "f1": 0.6817357366037285, "precision": 0.533120849712194, "recall": 0.9453333333333334}
+COMET INFO:     masks_9_3   : {"accuracy": 0.5561666666666667, "f1": 0.6754231816240427, "precision": 0.5324388938729914, "recall": 0.9236666666666669}
+COMET INFO:     masks_9_4   : {"accuracy": 0.562, "f1": 0.6748000645331655, "precision": 0.5366355045214851, "recall": 0.909}
+COMET INFO:     masks_9_5   : {"accuracy": 0.5498333333333333, "f1": 0.6685776226693236, "precision": 0.5291087348618592, "recall": 0.908}
+COMET INFO:     masks_9_6   : {"accuracy": 0.5383333333333333, "f1": 0.6584991918961554, "precision": 0.5224735639338439, "recall": 0.8906666666666666}
+COMET INFO:     masks_9_7   : {"accuracy": 0.5423333333333333, "f1": 0.6618153623008602, "precision": 0.5248330502287527, "recall": 0.8956666666666667}
+COMET INFO:     masks_9_8   : {"accuracy": 0.5333333333333333, "f1": 0.6594753487735062, "precision": 0.5191158005269978, "recall": 0.9039999999999999}
+COMET INFO:     masks_9_9   : {"accuracy": 0.524, "f1": 0.6577673365934613, "precision": 0.5134813016926163, "recall": 0.915}
+COMET INFO:   Uploads:
+COMET INFO:     environment details      : 1
+COMET INFO:     filename                 : 1
+COMET INFO:     git metadata             : 1
+COMET INFO:     git-patch (uncompressed) : 1 (26.34 KB)
+COMET INFO:     installed packages       : 1
+COMET INFO:     source_code              : 1 (7.98 KB)
+COMET INFO: 

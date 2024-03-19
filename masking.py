@@ -127,7 +127,7 @@ def main():
     mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
 
     avg_metrics = {thickness: {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} for thickness in mask_thickness_levels}
-    for th in np.linspace(0.3,1,num=14):
+    for th in np.linspace(0.6,1,num=8):
         for mask_thickness in mask_thickness_levels:
             all_metrics = []
 
@@ -152,11 +152,11 @@ def main():
                 pair_precision.append(precision)
                 pair_recall.append(recall)
                 pair_f1.append(f1)
-
-                print(f"  Accuracy: {mean(pair_acc):.4f}")
-                print(f"  Precision: {mean(pair_precision):.4f}")
-                print(f"  Recall: {mean(pair_recall):.4f}")
-                print(f"  F1 Score: {mean(pair_f1):.4f}\n")
+                print(f"Summary for {pairs_file} with {mask_thickness} masks {th} threshold:")
+                print(f"  Accuracy: {accuracy:.4f}")
+                print(f"  Precision: {precision:.4f}")
+                print(f"  Recall: {recall:.4f}")
+                print(f"  F1 Score: {f1:.4f}\n")
 
 
             # Calculate average metrics for this noise level
