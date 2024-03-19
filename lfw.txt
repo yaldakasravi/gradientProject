@@ -1,0 +1,218 @@
+Threshold: 60%
+Accuracy: 0.6550, Precision: 0.6154, Recall: 0.8267, F1 Score: 0.7055
+
+Threshold: 65%
+Accuracy: 0.6667, Precision: 0.6515, Recall: 0.7167, F1 Score: 0.6825
+
+Threshold: 70%
+Accuracy: 0.6867, Precision: 0.7414, Recall: 0.5733, F1 Score: 0.6466
+
+Threshold: 75%
+Accuracy: 0.6583, Precision: 0.8276, Recall: 0.4000, F1 Score: 0.5393
+
+Threshold: 80%
+Accuracy: 0.6133, Precision: 0.9359, Recall: 0.2433, F1 Score: 0.3862
+
+Threshold: 85%
+Accuracy: 0.5550, Precision: 0.9714, Recall: 0.1133, F1 Score: 0.2030
+
+Threshold: 90%
+Accuracy: 0.5117, Precision: 1.0000, Recall: 0.0233, F1 Score: 0.0456
+
+Evaluating pairs_02.txt...
+Threshold: 60%
+Accuracy: 0.6717, Precision: 0.6352, Recall: 0.8067, F1 Score: 0.7107
+
+Threshold: 65%
+Accuracy: 0.7000, Precision: 0.7083, Recall: 0.6800, F1 Score: 0.6939
+
+Threshold: 70%
+Accuracy: 0.7100, Precision: 0.7944, Recall: 0.5667, F1 Score: 0.6615
+
+Threshold: 75%
+Accuracy: 0.6683, Precision: 0.8976, Recall: 0.3800, F1 Score: 0.5340
+
+Threshold: 80%
+Accuracy: 0.6017, Precision: 0.9841, Recall: 0.2067, F1 Score: 0.3416
+
+Threshold: 85%
+Accuracy: 0.5350, Precision: 1.0000, Recall: 0.0700, F1 Score: 0.1308
+
+Threshold: 90%
+Accuracy: 0.5067, Precision: 1.0000, Recall: 0.0133, F1 Score: 0.0263
+
+Evaluating pairs_03.txt...
+Threshold: 60%
+Accuracy: 0.6683, Precision: 0.6241, Recall: 0.8467, F1 Score: 0.7185
+
+Threshold: 65%
+Accuracy: 0.6783, Precision: 0.6578, Recall: 0.7433, F1 Score: 0.6980
+
+Threshold: 70%
+Accuracy: 0.6867, Precision: 0.7333, Recall: 0.5867, F1 Score: 0.6519
+
+Threshold: 75%
+Accuracy: 0.6700, Precision: 0.8542, Recall: 0.4100, F1 Score: 0.5541
+
+Threshold: 80%
+Accuracy: 0.6033, Precision: 0.9429, Recall: 0.2200, F1 Score: 0.3568
+
+Threshold: 85%
+Accuracy: 0.5383, Precision: 0.9259, Recall: 0.0833, F1 Score: 0.1529
+
+Threshold: 90%
+Accuracy: 0.5217, Precision: 1.0000, Recall: 0.0433, F1 Score: 0.0831
+
+Evaluating pairs_04.txt...
+Threshold: 60%
+Accuracy: 0.6517, Precision: 0.6213, Recall: 0.7767, F1 Score: 0.6904
+
+Threshold: 65%
+Accuracy: 0.6800, Precision: 0.6901, Recall: 0.6533, F1 Score: 0.6712
+
+Threshold: 70%
+Accuracy: 0.6767, Precision: 0.7524, Recall: 0.5267, F1 Score: 0.6196
+
+Threshold: 75%
+Accuracy: 0.6500, Precision: 0.8358, Recall: 0.3733, F1 Score: 0.5161
+
+Threshold: 80%
+Accuracy: 0.6050, Precision: 0.9437, Recall: 0.2233, F1 Score: 0.3612
+
+Threshold: 85%
+Accuracy: 0.5500, Precision: 1.0000, Recall: 0.1000, F1 Score: 0.1818
+
+Threshold: 90%
+Accuracy: 0.5267, Precision: 1.0000, Recall: 0.0533, F1 Score: 0.1013
+
+Evaluating pairs_05.txt...
+Threshold: 60%
+Accuracy: 0.6850, Precision: 0.6572, Recall: 0.7733, F1 Score: 0.7106
+
+Threshold: 65%
+Accuracy: 0.7217, Precision: 0.7301, Recall: 0.7033, F1 Score: 0.7165
+
+Threshold: 70%
+Accuracy: 0.7100, Precision: 0.8058, Recall: 0.5533, F1 Score: 0.6561
+
+Threshold: 75%
+Accuracy: 0.6733, Precision: 0.9127, Recall: 0.3833, F1 Score: 0.5399
+
+Threshold: 80%
+Accuracy: 0.5883, Precision: 0.9649, Recall: 0.1833, F1 Score: 0.3081
+
+Threshold: 85%
+Accuracy: 0.5250, Precision: 1.0000, Recall: 0.0500, F1 Score: 0.0952
+
+Threshold: 90%
+Accuracy: 0.5033, Precision: 1.0000, Recall: 0.0067, F1 Score: 0.0132
+
+Evaluating pairs_06.txt...
+Threshold: 60%
+Accuracy: 0.6650, Precision: 0.6260, Recall: 0.8200, F1 Score: 0.7100
+
+Threshold: 65%
+Accuracy: 0.7283, Precision: 0.7217, Recall: 0.7433, F1 Score: 0.7323
+
+Threshold: 70%
+Accuracy: 0.7200, Precision: 0.8000, Recall: 0.5867, F1 Score: 0.6769
+
+Threshold: 75%
+Accuracy: 0.6917, Precision: 0.8966, Recall: 0.4333, F1 Score: 0.5843
+
+Threshold: 80%
+Accuracy: 0.6100, Precision: 0.9231, Recall: 0.2400, F1 Score: 0.3810
+
+Threshold: 85%
+Accuracy: 0.5500, Precision: 1.0000, Recall: 0.1000, F1 Score: 0.1818
+
+Threshold: 90%
+Accuracy: 0.5117, Precision: 1.0000, Recall: 0.0233, F1 Score: 0.0456
+
+Evaluating pairs_07.txt...
+Threshold: 60%
+Accuracy: 0.6783, Precision: 0.6397, Recall: 0.8167, F1 Score: 0.7174
+
+Threshold: 65%
+Accuracy: 0.7117, Precision: 0.7138, Recall: 0.7067, F1 Score: 0.7102
+
+Threshold: 70%
+Accuracy: 0.7167, Precision: 0.7876, Recall: 0.5933, F1 Score: 0.6768
+
+Threshold: 75%
+Accuracy: 0.6750, Precision: 0.8777, Recall: 0.4067, F1 Score: 0.5558
+
+Threshold: 80%
+Accuracy: 0.6183, Precision: 0.9863, Recall: 0.2400, F1 Score: 0.3861
+
+Threshold: 85%
+Accuracy: 0.5500, Precision: 1.0000, Recall: 0.1000, F1 Score: 0.1818
+
+Threshold: 90%
+Accuracy: 0.5067, Precision: 1.0000, Recall: 0.0133, F1 Score: 0.0263
+
+Evaluating pairs_08.txt...
+Threshold: 60%
+Accuracy: 0.6800, Precision: 0.6452, Recall: 0.8000, F1 Score: 0.7143
+
+Threshold: 65%
+Accuracy: 0.7017, Precision: 0.7037, Recall: 0.6967, F1 Score: 0.7002
+
+Threshold: 70%
+Accuracy: 0.7017, Precision: 0.7980, Recall: 0.5400, F1 Score: 0.6441
+
+Threshold: 75%
+Accuracy: 0.6667, Precision: 0.8906, Recall: 0.3800, F1 Score: 0.5327
+
+Threshold: 80%
+Accuracy: 0.5917, Precision: 0.9231, Recall: 0.2000, F1 Score: 0.3288
+
+Threshold: 85%
+Accuracy: 0.5367, Precision: 0.9231, Recall: 0.0800, F1 Score: 0.1472
+
+Threshold: 90%
+Accuracy: 0.5133, Precision: 1.0000, Recall: 0.0267, F1 Score: 0.0519
+
+Evaluating pairs_09.txt...
+Threshold: 60%
+Accuracy: 0.6700, Precision: 0.6269, Recall: 0.8400, F1 Score: 0.7179
+
+Threshold: 65%
+Accuracy: 0.6800, Precision: 0.6667, Recall: 0.7200, F1 Score: 0.6923
+
+Threshold: 70%
+Accuracy: 0.7100, Precision: 0.7647, Recall: 0.6067, F1 Score: 0.6766
+
+Threshold: 75%
+Accuracy: 0.6867, Precision: 0.8684, Recall: 0.4400, F1 Score: 0.5841
+
+Threshold: 80%
+Accuracy: 0.6200, Precision: 0.9615, Recall: 0.2500, F1 Score: 0.3968
+
+Threshold: 85%
+Accuracy: 0.5483, Precision: 0.9677, Recall: 0.1000, F1 Score: 0.1813
+
+Threshold: 90%
+Accuracy: 0.5117, Precision: 1.0000, Recall: 0.0233, F1 Score: 0.0456
+
+Evaluating pairs_10.txt...
+Threshold: 60%
+Accuracy: 0.6550, Precision: 0.6177, Recall: 0.8133, F1 Score: 0.7022
+
+Threshold: 65%
+Accuracy: 0.6800, Precision: 0.6698, Recall: 0.7100, F1 Score: 0.6893
+
+Threshold: 70%
+Accuracy: 0.6933, Precision: 0.7566, Recall: 0.5700, F1 Score: 0.6502
+
+Threshold: 75%
+Accuracy: 0.6717, Precision: 0.8759, Recall: 0.4000, F1 Score: 0.5492
+
+Threshold: 80%
+Accuracy: 0.6050, Precision: 0.9315, Recall: 0.2267, F1 Score: 0.3646
+
+Threshold: 85%
+Accuracy: 0.5483, Precision: 1.0000, Recall: 0.0967, F1 Score: 0.1763
+
+Threshold: 90%
+Accuracy: 0.5150, Precision: 1.0000, Recall: 0.0300, F1 Score: 0.0583

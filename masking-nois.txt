@@ -1,0 +1,479 @@
+Summary for pairs_01.txt with 0.0 masks:
+  Accuracy: 0.5400
+  Precision: 0.5276
+  Recall: 0.7633
+  F1 Score: 0.6240
+
+Summary for pairs_02.txt with 0.0 masks:
+  Accuracy: 0.5683
+  Precision: 0.5519
+  Recall: 0.7267
+  F1 Score: 0.6273
+
+Summary for pairs_03.txt with 0.0 masks:
+  Accuracy: 0.5550
+  Precision: 0.5367
+  Recall: 0.8033
+  F1 Score: 0.6435
+
+Summary for pairs_04.txt with 0.0 masks:
+  Accuracy: 0.5750
+  Precision: 0.5558
+  Recall: 0.7467
+  F1 Score: 0.6373
+
+Summary for pairs_05.txt with 0.0 masks:
+  Accuracy: 0.5633
+  Precision: 0.5461
+  Recall: 0.7500
+  F1 Score: 0.6320
+
+Summary for pairs_06.txt with 0.0 masks:
+  Accuracy: 0.5667
+  Precision: 0.5459
+  Recall: 0.7933
+  F1 Score: 0.6467
+
+Summary for pairs_07.txt with 0.0 masks:
+  Accuracy: 0.5700
+  Precision: 0.5491
+  Recall: 0.7833
+  F1 Score: 0.6456
+
+Summary for pairs_08.txt with 0.0 masks:
+  Accuracy: 0.5817
+  Precision: 0.5605
+  Recall: 0.7567
+  F1 Score: 0.6440
+
+Summary for pairs_09.txt with 0.0 masks:
+  Accuracy: 0.6083
+  Precision: 0.5791
+  Recall: 0.7933
+  F1 Score: 0.6695
+
+Summary for pairs_10.txt with 0.0 masks:
+  Accuracy: 0.6100
+  Precision: 0.5855
+  Recall: 0.7533
+  F1 Score: 0.6589
+
+Summary for pairs_01.txt with 0.1 masks:
+  Accuracy: 0.5750
+  Precision: 0.5573
+  Recall: 0.7300
+  F1 Score: 0.6320
+
+Summary for pairs_02.txt with 0.1 masks:
+  Accuracy: 0.6183
+  Precision: 0.5890
+  Recall: 0.7833
+  F1 Score: 0.6724
+
+Summary for pairs_03.txt with 0.1 masks:
+  Accuracy: 0.5433
+  Precision: 0.5314
+  Recall: 0.7333
+  F1 Score: 0.6162
+
+Summary for pairs_04.txt with 0.1 masks:
+  Accuracy: 0.5967
+  Precision: 0.5792
+  Recall: 0.7067
+  F1 Score: 0.6366
+
+Summary for pairs_05.txt with 0.1 masks:
+  Accuracy: 0.6333
+  Precision: 0.6136
+  Recall: 0.7200
+  F1 Score: 0.6626
+
+Summary for pairs_06.txt with 0.1 masks:
+  Accuracy: 0.6383
+  Precision: 0.6045
+  Recall: 0.8000
+  F1 Score: 0.6887
+
+Summary for pairs_07.txt with 0.1 masks:
+  Accuracy: 0.5983
+  Precision: 0.5711
+  Recall: 0.7900
+  F1 Score: 0.6629
+
+Summary for pairs_08.txt with 0.1 masks:
+  Accuracy: 0.6033
+  Precision: 0.5767
+  Recall: 0.7767
+  F1 Score: 0.6619
+
+Summary for pairs_09.txt with 0.1 masks:
+  Accuracy: 0.5833
+  Precision: 0.5628
+  Recall: 0.7467
+  F1 Score: 0.6418
+
+Summary for pairs_10.txt with 0.1 masks:
+  Accuracy: 0.5967
+  Precision: 0.5718
+  Recall: 0.7700
+  F1 Score: 0.6562
+
+Summary for pairs_01.txt with 0.2 masks:
+  Accuracy: 0.5850
+  Precision: 0.5597
+  Recall: 0.7967
+  F1 Score: 0.6575
+
+Summary for pairs_02.txt with 0.2 masks:
+  Accuracy: 0.5883
+  Precision: 0.5661
+  Recall: 0.7567
+  F1 Score: 0.6476
+
+Summary for pairs_03.txt with 0.2 masks:
+  Accuracy: 0.5883
+  Precision: 0.5624
+  Recall: 0.7967
+  F1 Score: 0.6593
+
+Summary for pairs_04.txt with 0.2 masks:
+  Accuracy: 0.6083
+  Precision: 0.5835
+  Recall: 0.7567
+  F1 Score: 0.6589
+
+Summary for pairs_05.txt with 0.2 masks:
+  Accuracy: 0.5883
+  Precision: 0.5726
+  Recall: 0.6967
+  F1 Score: 0.6286
+
+Summary for pairs_06.txt with 0.2 masks:
+  Accuracy: 0.6067
+  Precision: 0.5829
+  Recall: 0.7500
+  F1 Score: 0.6560
+
+Summary for pairs_07.txt with 0.2 masks:
+  Accuracy: 0.5833
+  Precision: 0.5631
+  Recall: 0.7433
+  F1 Score: 0.6408
+
+Summary for pairs_08.txt with 0.2 masks:
+  Accuracy: 0.5900
+  Precision: 0.5699
+  Recall: 0.7333
+  F1 Score: 0.6414
+
+Summary for pairs_09.txt with 0.2 masks:
+  Accuracy: 0.6000
+  Precision: 0.5718
+  Recall: 0.7967
+  F1 Score: 0.6657
+
+Summary for pairs_10.txt with 0.2 masks:
+  Accuracy: 0.6083
+  Precision: 0.5810
+  Recall: 0.7767
+  F1 Score: 0.6648
+
+Summary for pairs_01.txt with 0.3 masks:
+  Accuracy: 0.5917
+  Precision: 0.5666
+  Recall: 0.7800
+  F1 Score: 0.6564
+
+Summary for pairs_02.txt with 0.3 masks:
+  Accuracy: 0.5833
+  Precision: 0.5665
+  Recall: 0.7100
+  F1 Score: 0.6302
+
+Summary for pairs_03.txt with 0.3 masks:
+  Accuracy: 0.5317
+  Precision: 0.5224
+  Recall: 0.7400
+  F1 Score: 0.6124
+
+Summary for pairs_04.txt with 0.3 masks:
+  Accuracy: 0.5883
+  Precision: 0.5696
+  Recall: 0.7233
+  F1 Score: 0.6373
+
+Summary for pairs_05.txt with 0.3 masks:
+  Accuracy: 0.6050
+  Precision: 0.5797
+  Recall: 0.7633
+  F1 Score: 0.6590
+
+Summary for pairs_06.txt with 0.3 masks:
+  Accuracy: 0.6100
+  Precision: 0.5851
+  Recall: 0.7567
+  F1 Score: 0.6599
+
+Summary for pairs_07.txt with 0.3 masks:
+  Accuracy: 0.6267
+  Precision: 0.5984
+  Recall: 0.7700
+  F1 Score: 0.6735
+
+Summary for pairs_08.txt with 0.3 masks:
+  Accuracy: 0.5900
+  Precision: 0.5703
+  Recall: 0.7300
+  F1 Score: 0.6404
+
+Summary for pairs_09.txt with 0.3 masks:
+  Accuracy: 0.5833
+  Precision: 0.5616
+  Recall: 0.7600
+  F1 Score: 0.6459
+
+Summary for pairs_10.txt with 0.3 masks:
+  Accuracy: 0.5767
+  Precision: 0.5558
+  Recall: 0.7633
+  F1 Score: 0.6433
+
+Summary for pairs_01.txt with 0.4 masks:
+  Accuracy: 0.5333
+  Precision: 0.5240
+  Recall: 0.7267
+  F1 Score: 0.6089
+
+Summary for pairs_02.txt with 0.4 masks:
+  Accuracy: 0.6283
+  Precision: 0.6066
+  Recall: 0.7300
+  F1 Score: 0.6626
+
+Summary for pairs_03.txt with 0.4 masks:
+  Accuracy: 0.5350
+  Precision: 0.5246
+  Recall: 0.7467
+  F1 Score: 0.6162
+
+Summary for pairs_04.txt with 0.4 masks:
+  Accuracy: 0.5900
+  Precision: 0.5718
+  Recall: 0.7167
+  F1 Score: 0.6361
+
+Summary for pairs_05.txt with 0.4 masks:
+  Accuracy: 0.5750
+  Precision: 0.5558
+  Recall: 0.7467
+  F1 Score: 0.6373
+
+Summary for pairs_06.txt with 0.4 masks:
+  Accuracy: 0.5867
+  Precision: 0.5647
+  Recall: 0.7567
+  F1 Score: 0.6467
+
+Summary for pairs_07.txt with 0.4 masks:
+  Accuracy: 0.6217
+  Precision: 0.5910
+  Recall: 0.7900
+  F1 Score: 0.6762
+
+Summary for pairs_08.txt with 0.4 masks:
+  Accuracy: 0.6100
+  Precision: 0.5838
+  Recall: 0.7667
+  F1 Score: 0.6628
+
+Summary for pairs_09.txt with 0.4 masks:
+  Accuracy: 0.5950
+  Precision: 0.5707
+  Recall: 0.7667
+  F1 Score: 0.6543
+
+Summary for pairs_10.txt with 0.4 masks:
+  Accuracy: 0.5767
+  Precision: 0.5558
+  Recall: 0.7633
+  F1 Score: 0.6433
+
+Summary for pairs_01.txt with 0.5 masks:
+  Accuracy: 0.5600
+  Precision: 0.5448
+  Recall: 0.7300
+  F1 Score: 0.6239
+
+Summary for pairs_02.txt with 0.5 masks:
+  Accuracy: 0.5500
+  Precision: 0.5359
+  Recall: 0.7467
+  F1 Score: 0.6240
+
+Summary for pairs_03.txt with 0.5 masks:
+  Accuracy: 0.5617
+  Precision: 0.5437
+  Recall: 0.7667
+  F1 Score: 0.6362
+
+Summary for pairs_04.txt with 0.5 masks:
+  Accuracy: 0.6000
+  Precision: 0.5746
+  Recall: 0.7700
+  F1 Score: 0.6581
+
+Summary for pairs_05.txt with 0.5 masks:
+  Accuracy: 0.6233
+  Precision: 0.5944
+  Recall: 0.7767
+  F1 Score: 0.6734
+
+Summary for pairs_06.txt with 0.5 masks:
+  Accuracy: 0.6050
+  Precision: 0.5770
+  Recall: 0.7867
+  F1 Score: 0.6657
+
+Summary for pairs_07.txt with 0.5 masks:
+  Accuracy: 0.5900
+  Precision: 0.5646
+  Recall: 0.7867
+  F1 Score: 0.6574
+
+Summary for pairs_08.txt with 0.5 masks:
+  Accuracy: 0.5733
+  Precision: 0.5556
+  Recall: 0.7333
+  F1 Score: 0.6322
+
+Summary for pairs_09.txt with 0.5 masks:
+  Accuracy: 0.5983
+  Precision: 0.5732
+  Recall: 0.7700
+  F1 Score: 0.6572
+
+Summary for pairs_10.txt with 0.5 masks:
+  Accuracy: 0.5883
+  Precision: 0.5648
+  Recall: 0.7700
+  F1 Score: 0.6516
+
+Summary for pairs_01.txt with 0.6 masks:
+  Accuracy: 0.5633
+  Precision: 0.5444
+  Recall: 0.7767
+  F1 Score: 0.6401
+
+Summary for pairs_02.txt with 0.6 masks:
+  Accuracy: 0.5767
+  Precision: 0.5575
+  Recall: 0.7433
+  F1 Score: 0.6371
+
+Summary for pairs_03.txt with 0.6 masks:
+  Accuracy: 0.5500
+  Precision: 0.5350
+  Recall: 0.7633
+  F1 Score: 0.6291
+
+Summary for pairs_04.txt with 0.6 masks:
+  Accuracy: 0.5717
+  Precision: 0.5539
+  Recall: 0.7367
+  F1 Score: 0.6323
+
+Summary for pairs_05.txt with 0.6 masks:
+  Accuracy: 0.5917
+  Precision: 0.5700
+  Recall: 0.7467
+  F1 Score: 0.6465
+
+Summary for pairs_06.txt with 0.6 masks:
+  Accuracy: 0.6150
+  Precision: 0.5891
+  Recall: 0.7600
+  F1 Score: 0.6638
+
+Summary for pairs_07.txt with 0.6 masks:
+  Accuracy: 0.5867
+  Precision: 0.5644
+  Recall: 0.7600
+  F1 Score: 0.6477
+
+Summary for pairs_08.txt with 0.6 masks:
+  Accuracy: 0.5767
+  Precision: 0.5599
+  Recall: 0.7167
+  F1 Score: 0.6287
+
+Summary for pairs_09.txt with 0.6 masks:
+  Accuracy: 0.5950
+  Precision: 0.5693
+  Recall: 0.7800
+  F1 Score: 0.6582
+
+Summary for pairs_10.txt with 0.6 masks:
+  Accuracy: 0.5833
+  Precision: 0.5638
+  Recall: 0.7367
+  F1 Score: 0.6387
+
+Summary for pairs_01.txt with 0.7 masks:
+  Accuracy: 0.5433
+  Precision: 0.5311
+  Recall: 0.7400
+  F1 Score: 0.6184
+
+Summary for pairs_02.txt with 0.7 masks:
+  Accuracy: 0.5883
+  Precision: 0.5648
+  Recall: 0.7700
+  F1 Score: 0.6516
+
+Summary for pairs_03.txt with 0.7 masks:
+  Accuracy: 0.5417
+  Precision: 0.5296
+  Recall: 0.7467
+  F1 Score: 0.6196
+
+Summary for pairs_04.txt with 0.7 masks:
+  Accuracy: 0.5717
+  Precision: 0.5547
+  Recall: 0.7267
+  F1 Score: 0.6291
+
+Summary for pairs_05.txt with 0.7 masks:
+  Accuracy: 0.6217
+  Precision: 0.5901
+  Recall: 0.7967
+  F1 Score: 0.6780
+
+Summary for pairs_06.txt with 0.7 masks:
+  Accuracy: 0.5800
+  Precision: 0.5583
+  Recall: 0.7667
+  F1 Score: 0.6461
+
+Summary for pairs_07.txt with 0.7 masks:
+  Accuracy: 0.5717
+  Precision: 0.5504
+  Recall: 0.7833
+  F1 Score: 0.6465
+
+Summary for pairs_08.txt with 0.7 masks:
+  Accuracy: 0.5617
+  Precision: 0.5400
+  Recall: 0.8333
+  F1 Score: 0.6553
+
+Summary for pairs_09.txt with 0.7 masks:
+  Accuracy: 0.5483
+  Precision: 0.5319
+  Recall: 0.8067
+  F1 Score: 0.6411
+
+Summary for pairs_10.txt with 0.7 masks:
+  Accuracy: 0.5433
+  Precision: 0.5278
+  Recall: 0.8233
+  F1 Score: 0.6432
