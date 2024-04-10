@@ -181,58 +181,102 @@ if __name__ == "__main__":
 # TensorFlow compatible image loading and preprocessing
 
 def load_and_preprocess_image(image_path, mask_thickness, dataset_dir):
-    img = tf.io.read_file(image_path)
-    img = tf.image.decode_jpeg(img, channels=3)
-    img = tf.image.resize(img, [112, 112])
-    
-    # Ensure the shape is known for the tf.data pipeline
-    img.set_shape([112, 112, 3])
-    
-    # Placeholder for the operation that selects a different person's image
-    # This should be a TensorFlow operation
-    different_person_img = tf.identity(img)  # Replace this with actual different person selection logic
-    
-    # Define the number of rows to swap based on the mask thickness
-    num_rows_to_swap = tf.cast(112 * mask_thickness, tf.int32)
-    start_row = (112 - num_rows_to_swap) // 2
-    end_row = start_row + num_rows_to_swap
-    
-    # Combine the images
-    img = tf.concat([
-        img[:start_row, :, :],
-        different_person_img[start_row:end_row, :, :],
-        img[end_row:, :, :]
-    ], axis=0)
-    
+    # Load the target image
+    img = image.load_img(image_path, target_size=(112, 112))
+    img_array = image.img_to_array(img)
+
+    # Get a list of all person directories in the dataset directory
+    try:
+        all_person_dirs = [os.path.join(dataset_dir, d) for d in os.listdir(dataset_dir) 
+                           if os.path.isdir(os.path.join(dataset_dir, d))]
+    except FileNotFoundError:
+        print(f"Dataset directory not found: {dataset_dir}")
+        return None
+
+    # Get the current person's directory to exclude it
+    current_person_dir = os.path.dirname(image_path)
+
+    # Exclude the current person's directory from the list
+    all_person_dirs = [d for d in all_person_dirs if d != current_person_dir]
+
+    # If there are other directories, randomly select one
+    if all_person_dirs:
+        different_person_dir = random.choice(all_person_dirs)
+
+        # List all images in the newly selected person's directory
+        try:
+            all_images = [f for f in os.listdir(different_person_dir) if os.path.isfile(os.path.join(different_person_dir, f))]
+        except FileNotFoundError:
+            print(f"Directory not found: {different_person_dir}")
+            return None
+
+        # Randomly select one image to swap with
+        if all_images:
+            swap_image_name = random.choice(all_images)
+            swap_image_path = os.path.join(different_person_dir, swap_image_name)
+
+            # Load the image selected for swapping
+            swap_img = image.load_img(swap_image_path, target_size=(112, 112))
+            swap_img_array = image.img_to_array(swap_img)
+
+            # Define the number of rows to swap based on the mask thickness
+            num_rows_to_swap = int(112 * mask_thickness)
+
+            # Swap a horizontal strip across the center of the image
+            start_row = (112 - num_rows_to_swap) // 2
+            end_row = start_row + num_rows_to_swap
+            img_array[start_row:end_row, :, :] = swap_img_array[start_row:end_row, :, :]
+        else:
+            print(f"No images found in the selected directory: {different_person_dir}")
+    else:
+        print("No different person directories found to swap with.")
+
     # Preprocess the image for the model
-    img = preprocess_input(img)
-    return img
+    img_array_expanded_dims = np.expand_dims(img_array, axis=0)
+    return preprocess_input(img_array_expanded_dims)
 
-# Preprocessing pipeline for a dataset
-def preprocess_dataset(file_paths, mask_thickness):
-    # Load and preprocess images
-    imgs = []
-    for file_path in file_paths:
-        img = load_and_preprocess_image(file_path, mask_thickness, dataset_dir)
-        imgs.append(img)
-    return tf.convert_to_tensor(imgs)
+def preprocess_dataset(pairs, mask_thickness, dataset_dir):
+    # Adapted to accept pairs of paths directly
+    processed_imgs = []
+    for pair in pairs:
+        img1 = load_and_preprocess_image(pair[0], mask_thickness, dataset_dir)
+        img2 = load_and_preprocess_image(pair[1], mask_thickness, dataset_dir)
+        processed_imgs.append(img1)
+        processed_imgs.append(img2)
+    return tf.convert_to_tensor(processed_imgs, dtype=tf.float32)
 
-# Replace evaluate_lfw function with a version using tf.data for efficiency
-def evaluate_lfw(model, dataset_dir, pairs_file_paths, mask_thickness):
-    # Map file paths to datasets and preprocess
-    datasets = [preprocess_dataset(pair_paths, mask_thickness) for pair_paths in pairs_file_paths]
+def read_pairs_file(pairs_file_path, dataset_dir):
+    # Reads a pairs file and returns a list of tuples, each containing the paths of a pair of images
+    pairs = []
+    with open(pairs_file_path, 'r') as f:
+        for line in f:
+            parts = line.strip().split()
+            if len(parts) < 2:
+                # Skip lines that don't have at least two parts
+                print(f"Skipping malformed line: {line.strip()}")
+                continue
+            pairs.append((os.path.join(dataset_dir, parts[0]), os.path.join(dataset_dir, parts[1])))
+    return pairs
 
+def evaluate_lfw(model, dataset_dir, pairs_files, mask_thickness):
+    # Adjusted to use read_pairs_file and to directly work with paths
+    labels = []
     similarities = []
-    for dataset in datasets:
+    
+    for pairs_file in pairs_files:
+        pairs_path = os.path.join(pairs_files_base, pairs_file)
+        pairs = read_pairs_file(pairs_path, dataset_dir)
+        dataset = preprocess_dataset(pairs, mask_thickness, dataset_dir)
         embeddings = model.predict(dataset)
-        # Compute cosine similarities in a batched manner
-        sims = cosine_similarity(embeddings[::2], embeddings[1::2])
-        similarities.extend(sims)
-
-    # Generate labels for the pairs
-    labels = np.array([1, 0] * (len(similarities) // 2))
-
-    return labels, np.array(similarities)
+        
+        # Example similarity computation - adjust as necessary
+        for i in range(0, len(embeddings), 2):
+            sim = np.dot(embeddings[i], embeddings[i+1]) / (np.linalg.norm(embeddings[i]) * np.linalg.norm(embeddings[i+1]))
+            similarities.append(sim)
+            # Adjust label generation as per your swapping logic and evaluation criteria
+            labels.append(1 if pairs_file.contains("same") else 0)
+    
+    return np.array(labels), np.array(similarities)
 
 def main():
     model = load_model(model_path)
@@ -247,7 +291,7 @@ def main():
         pairs_file_paths = [[os.path.join(dataset_dir, f'pair_{idx}.jpg') for idx in range(4)] for _ in pairs_files]  # Adjust with your actual logic for pairs
 
         # Evaluate LFW dataset
-        labels, similarities = evaluate_lfw(model, dataset_dir, pairs_file_paths, mask_thickness)
+        labels, similarities = evaluate_lfw(model, dataset_dir, pairs_files, mask_thickness)
 
         # Calculate metrics
         for threshold in thresholds:

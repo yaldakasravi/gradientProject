@@ -151,18 +151,16 @@ if __name__ == "__main__":
 
 #using dataloader to be faster 
 
-def preprocess_image(image_path, mask_thickness):
+def preprocess_image_without_mask(image_path):
+    # Load and preprocess the image without applying a mask
     img = image.load_img(image_path, target_size=(112, 112))
     img_array = image.img_to_array(img)
-    num_rows_to_mask = int(112 * mask_thickness)
-    start_row = (112 - num_rows_to_mask) // 2
-    end_row = start_row + num_rows_to_mask
-    img_array[start_row:end_row, :, :] = 0
     img_array = preprocess_input(img_array)
     return img_array
 
-def tf_preprocess_image(image_path, mask_thickness):
-    return tf.numpy_function(preprocess_image, [image_path, mask_thickness], tf.float32)
+def tf_preprocess_image_without_mask(image_path):
+    # TensorFlow wrapper to preprocess the image without a mask
+    return tf.numpy_function(preprocess_image_without_mask, [image_path], tf.float32)
 
 def get_embedding(model, image_path, mask_thickness):
     processed_image = tf_preprocess_image(image_path, mask_thickness)
@@ -181,16 +179,16 @@ def evaluate_lfw(model, dataset_dir, pairs_file_path, mask_thickness):
             yield os.path.join(dataset_dir, lines[i+2]), os.path.join(dataset_dir, lines[i+3]), 0  # Different people
 
     # Create a dataset from the pairs
-    pairs_dataset = Dataset.from_generator(lambda: parse_pairs(pairs_file_path),
+    pairs_dataset = tf.data.Dataset.from_generator(lambda: parse_pairs(pairs_file_path),
                                            output_types=(tf.string, tf.string, tf.int32))
-    
+
     # Map preprocessing
     def process_path(img_path1, img_path2, label):
         return (tf_preprocess_image(img_path1, mask_thickness),
-                tf_preprocess_image(img_path2, mask_thickness)), label
-    
+                tf_preprocess_image_without_mask(img_path2)), label  # Apply mask to img1, load img2 without mask
+
     pairs_dataset = pairs_dataset.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    
+
     similarities, labels = [], []
     for (img1, img2), label in pairs_dataset:
         embedding1 = model.predict(tf.expand_dims(img1, axis=0))
@@ -198,7 +196,7 @@ def evaluate_lfw(model, dataset_dir, pairs_file_path, mask_thickness):
         similarity = 1 - cosine(embedding1.flatten(), embedding2.flatten())
         similarities.append(similarity)
         labels.append(label)
-    
+
     return np.array(labels), np.array(similarities)
 
 def calculate_metrics(labels, similarities,threshold):
@@ -255,7 +253,7 @@ def main():
                 avg_accuracy_per_thickness_level[mask_thickness].append(avg_metrics[mask_thickness]['accuracy'])
 
     # Plotting the results
-    save_directory = "threshold-mask-masking_plot"
+    save_directory = "threshold-mask-masking-oneSide_plot"
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
 
@@ -263,12 +261,12 @@ def main():
     for mask_thickness in mask_thickness_levels:
         plt.plot(thresholds, avg_accuracy_per_thickness_level[mask_thickness], marker='o', linestyle='-', label=f'Mask Thickness {mask_thickness:.1f}')
 
-    plt.title("Accuracy vs. Threshold for Different Mask Thicknesses")
+    plt.title("Accuracy vs. Threshold for Different Mask Thicknesses one side")
     plt.xlabel("Threshold")
     plt.ylabel("Accuracy")
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold_for_mask_thicknesses.png"))
+    plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold_for_mask_thicknesses-oneSide.png"))
     plt.close()
 if __name__ == "__main__":
     main()

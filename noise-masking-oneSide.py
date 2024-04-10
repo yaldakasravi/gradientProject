@@ -193,11 +193,11 @@ def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
         # Unpack the tuple
         file_path1, file_path2, label = pair
         img1 = preprocess_image(file_path1, noise_factor)
-        img2 = preprocess_image(file_path2, noise_factor)
+        img2 = preprocess_image(file_path2, 0)
         return (img1, img2), label
 
     # Use a lambda to ensure the function takes a single argument
-    pairs_dataset = lines_dataset.map(lambda file_path1, file_path2, label: load_and_preprocess((file_path1, file_path2, label)))
+    pairs_dataset = lines_dataset.map(lambda pair: load_and_preprocess(pair))
     return pairs_dataset
 
 def compute_similarity(embedding1, embedding2):
@@ -243,13 +243,13 @@ def main():
                 print(f"  Threshold {th}: Accuracy: {avg_accuracy_per_noise_level[noise_factor][th]:.4f}")
 
         # Plotting
-        save_directory = "threshold-mask-noise_plot"
+        save_directory = "threshold-mask-noise-oneSide_plot"
         os.makedirs(save_directory, exist_ok=True)
 
         for noise_factor, accuracies in avg_accuracy_per_noise_level.items():
             plt.figure()
             plt.plot(thresholds, accuracies, marker='o', linestyle='-', label=f'Noise {noise_factor}')
-            plt.title(f"Accuracy vs. Threshold for Noise {noise_factor}")
+            plt.title(f"Accuracy vs. Threshold for Noise {noise_factor}-oneSide")
             plt.xlabel("Threshold")
             plt.ylabel("Accuracy")
             plt.legend(loc='best')
