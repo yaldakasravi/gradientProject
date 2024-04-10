@@ -100,7 +100,7 @@ def plot_and_save_metrics(metrics, pairs_file, thresholds):
 def main():
     model = load_model(model_path)
     # Define your thresholds here (convert percentages to decimal values)
-    thresholds = [0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
+    thresholds = [0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
 
     for pairs_file in pairs_files:
         print(f"Evaluating {pairs_file}...")

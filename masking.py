@@ -17,37 +17,8 @@ dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
 
+#very slow 
 """
-#make it noisy 
-def load_and_preprocess_image(image_path, noise_factor):
-    img = image.load_img(image_path, target_size=(112, 112))  # Load the image with the target size
-    img_array = image.img_to_array(img)  # Convert to a NumPy array
-
-    # Define the region of interest where noise will be added
-    mask_region = img_array[40:60, 30:-30, :]
-
-    # Define the standard deviation of the Gaussian noise
-    noise_sigma = noise_factor  # This controls how "noisy" the image will be
-
-    # Generate Gaussian noise
-    noise = np.random.normal(loc=0.0, scale=noise_sigma, size=mask_region.shape)
-
-    # Since img_array is likely to be uint8, noise also needs to be in the same type
-    noise = noise.astype(np.uint8)
-
-    # Add the noise to the specified part of the image array
-    img_array[40:60, 30:-30, :] = mask_region + noise
-
-    # Ensure the values are still in the range [0, 255]
-    img_array = np.clip(img_array, 0, 255)
-
-    # Preprocess the image for the model
-    img_array_expanded_dims = np.expand_dims(img_array, axis=0)
-    processed_img = preprocess_input(img_array_expanded_dims.astype(np.float32))
-
-    return preprocess_input(img_array_expanded_dims)
-"""
-#make it black
 def load_and_preprocess_image(image_path, mask_thickness):
     img = image.load_img(image_path, target_size=(112, 112))  # Load the image with the target size
     img_array = image.img_to_array(img)  # Convert to a NumPy array
@@ -118,23 +89,131 @@ def calculate_metrics(labels, similarities,threshold):
         'f1': f1
     }
 
-#make it black 
+#make it black
+
+def main():
+    with tf.device('/GPU:1'):
+        model = load_model(model_path)
+        thresholds = np.linspace(0.3, 1, num=14)
+        mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
+
+        # Initialize dictionary to store average accuracy for each mask thickness level across thresholds
+        avg_accuracy_per_thickness_level = {thickness: [] for thickness in mask_thickness_levels}
+
+        for th in thresholds:
+            avg_metrics = {thickness: {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} for thickness in mask_thickness_levels}
+
+            for mask_thickness in mask_thickness_levels:
+                all_metrics = []
+
+                for pairs_file in pairs_files:
+                    pairs_file_path = os.path.join(pairs_files_base, pairs_file)
+                    y_true, y_pred_scores = evaluate_lfw(model, dataset_dir, pairs_file_path, mask_thickness)
+                    metrics = calculate_metrics(y_true, y_pred_scores, th)
+                    all_metrics.append(metrics)
+
+                # Calculate average metrics for this mask thickness level
+                for metric in ['accuracy', 'precision', 'recall', 'f1']:
+                    metric_values = [m[metric] for m in all_metrics]
+                    avg_metrics[mask_thickness][metric] = np.mean(metric_values)
+                # Correctly print the summary using the avg_metrics for the current noise_factor and threshold
+                print(f"  Accuracy: {avg_metrics[mask_thickness]['accuracy']:.4f}")
+                print(f"  Precision: {avg_metrics[mask_thickness]['precision']:.4f}")
+                print(f"  Recall: {avg_metrics[mask_thickness]['recall']:.4f}")
+                print(f"  F1 Score: {avg_metrics[mask_thickness]['f1']:.4f}\n")
+            
+            # Store average accuracy for each mask thickness level for this threshold
+            for mask_thickness in mask_thickness_levels:
+                avg_accuracy_per_thickness_level[mask_thickness].append(avg_metrics[mask_thickness]['accuracy'])
+
+        # Plotting
+        save_directory = "threshold-black-masking_plot"
+        if not os.path.exists(save_directory):
+            os.makedirs(save_directory)
+
+        plt.figure()
+        for mask_thickness in mask_thickness_levels:
+            plt.plot(thresholds, avg_accuracy_per_thickness_level[mask_thickness], marker='o', linestyle='-', label=f'Thickness {mask_thickness:.1f}')
+
+        plt.title("Accuracy vs. Threshold for different Mask Thicknesses")
+        plt.xlabel("Threshold")
+        plt.ylabel("Accuracy")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold_for_mask_thicknesses.png"))
+        plt.close()
+
+if __name__ == "__main__":
+    main()
+"""
+
+#using dataloader to be faster 
+
+def preprocess_image(image_path, mask_thickness):
+    img = image.load_img(image_path, target_size=(112, 112))
+    img_array = image.img_to_array(img)
+    num_rows_to_mask = int(112 * mask_thickness)
+    start_row = (112 - num_rows_to_mask) // 2
+    end_row = start_row + num_rows_to_mask
+    img_array[start_row:end_row, :, :] = 0
+    img_array = preprocess_input(img_array)
+    return img_array
+
+def tf_preprocess_image(image_path, mask_thickness):
+    return tf.numpy_function(preprocess_image, [image_path, mask_thickness], tf.float32)
+
+def get_embedding(model, image_path, mask_thickness):
+    processed_image = tf_preprocess_image(image_path, mask_thickness)
+    processed_image.set_shape((112, 112, 3))
+    return model.predict(tf.expand_dims(processed_image, axis=0))
+
+# Modify evaluate_lfw to use a TensorFlow data pipeline for loading and preprocessing images
+def evaluate_lfw(model, dataset_dir, pairs_file_path, mask_thickness):
+    # Implement function to parse pairs file and return a dataset
+    def parse_pairs(pairs_file_path):
+        with open(pairs_file_path, 'r') as f:
+            lines = [line.strip() for line in f.readlines() if line.strip()]
+        # Assuming each block of 4 lines in the pairs file corresponds to two pairs of images
+        for i in range(0, len(lines), 4):
+            yield os.path.join(dataset_dir, lines[i]), os.path.join(dataset_dir, lines[i+1]), 1  # Same person
+            yield os.path.join(dataset_dir, lines[i+2]), os.path.join(dataset_dir, lines[i+3]), 0  # Different people
+
+    # Create a dataset from the pairs
+    pairs_dataset = Dataset.from_generator(lambda: parse_pairs(pairs_file_path),
+                                           output_types=(tf.string, tf.string, tf.int32))
+
+    # Map preprocessing
+    def process_path(img_path1, img_path2, label):
+        return (tf_preprocess_image(img_path1, mask_thickness),
+                tf_preprocess_image(img_path2, mask_thickness)), label
+
+    pairs_dataset = pairs_dataset.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+    similarities, labels = [], []
+    for (img1, img2), label in pairs_dataset:
+        embedding1 = model.predict(tf.expand_dims(img1, axis=0))
+        embedding2 = model.predict(tf.expand_dims(img2, axis=0))
+        similarity = 1 - cosine(embedding1.flatten(), embedding2.flatten())
+        similarities.append(similarity)
+        labels.append(label)
+
+    return np.array(labels), np.array(similarities)
+
+# Main execution block remains mostly unchanged
 def main():
     model = load_model(model_path)
-    metrics_results = []
-
-    # Instead of noise_levels, define mask thickness levels (e.g., 10% to 100% of the image height)
+    # Define evaluation parameters
+    thresholds = np.linspace(0.3, 1, num=14)
     mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
 
-    avg_metrics = {thickness: {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} for thickness in mask_thickness_levels}
-    for th in np.linspace(0.6,1,num=8):
+    # Initialize dictionary to store average accuracy for each mask thickness level across thresholds
+    avg_accuracy_per_thickness_level = {thickness: [] for thickness in mask_thickness_levels}
+
+    for th in thresholds:
+        avg_metrics = {thickness: {'accuracy': []} for thickness in mask_thickness_levels}
+
         for mask_thickness in mask_thickness_levels:
             all_metrics = []
-
-            pair_acc = []
-            pair_precision = []
-            pair_recall = []
-            pair_f1 = []
 
             for pairs_file in pairs_files:
                 pairs_file_path = os.path.join(pairs_files_base, pairs_file)
@@ -142,104 +221,34 @@ def main():
                 metrics = calculate_metrics(y_true, y_pred_scores, th)
                 all_metrics.append(metrics)
 
-                # Extract metrics from the returned dictionary
-                accuracy = metrics['accuracy']
-                precision = metrics['precision']
-                recall = metrics['recall']
-                f1 = metrics['f1']
-
-                pair_acc.append(accuracy)
-                pair_precision.append(precision)
-                pair_recall.append(recall)
-                pair_f1.append(f1)
-                print(f"Summary for {pairs_file} with {mask_thickness} masks {th} threshold:")
-                print(f"  Accuracy: {accuracy:.4f}")
-                print(f"  Precision: {precision:.4f}")
-                print(f"  Recall: {recall:.4f}")
-                print(f"  F1 Score: {f1:.4f}\n")
-
-
-            # Calculate average metrics for this noise level
-            for metric in ['accuracy', 'precision', 'recall', 'f1']:
+            # Calculate average metrics for this mask thickness level
+            for metric in ['accuracy']:
                 metric_values = [m[metric] for m in all_metrics]
                 avg_metrics[mask_thickness][metric] = np.mean(metric_values)
 
-        save_directory = "threshold-black-masking_plot"
-        if not os.path.exists(save_directory):
-            os.makedirs(save_directory)
+            # Logging the results
+            print(f"Mask Thickness: {mask_thickness}, Threshold: {th}")
+            print(f"  Accuracy: {avg_metrics[mask_thickness]['accuracy']:.4f}")
 
-        for metric_name in ['accuracy', 'precision', 'recall', 'f1']:
-            plt.figure()
-            thickness_factors = list(mask_thickness_levels)
-            metric_values = [avg_metrics[thickness][metric_name] for thickness in thickness_factors]
-            plt.plot(thickness_factors, metric_values, marker='o', linestyle='-')
-            plt.title(f"{metric_name.capitalize()} vs. Mask Thickness")
-            plt.xlabel("Mask Thickness")
-            plt.ylabel(metric_name.capitalize())
-            plt.grid(True)
-            plt.savefig(os.path.join(save_directory, f"{metric_name}_vs_mask_thickness_at_{th:.2f}_threshold.png"))
-            plt.close()
-#make it noisy 
-"""
-def main():
-    model = load_model(model_path)
-    metrics_results = []
-    # Fixed threshold value
-    fixed_threshold = 0.65
+            # Store average accuracy for each mask thickness level for this threshold
+            for mask_thickness in mask_thickness_levels:
+                avg_accuracy_per_thickness_level[mask_thickness].append(avg_metrics[mask_thickness]['accuracy'])
 
-    noise_levels = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
-
-    avg_metrics = {noise: {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} for noise in noise_levels}
-
-    for noise_factor in noise_levels:
-        all_metrics = []
-        for pairs_file in pairs_files:
-            pairs_file_path = os.path.join(pairs_files_base, pairs_file)
-            y_true, y_pred_scores = evaluate_lfw(model, dataset_dir, pairs_file_path, noise_factor=noise_factor)
-            metrics = calculate_metrics(y_true, y_pred_scores, fixed_threshold)  # ensure this returns a dict
-            all_metrics.append(metrics)
-            result = calculate_metrics(y_true, y_pred_scores, fixed_threshold)
-            if isinstance(result, dict):
-                all_metrics.append(result)
-                accuracy = result['accuracy']
-                precision = result['precision']
-                recall = result['recall']
-                f1 = result['f1']
-            else:
-                print("Unexpected result type:", type(result))
-            # Extract metrics from the returned dictionary
-            #accuracy = metrics['accuracy']
-            #precision = metrics['precision']
-            #recall = metrics['recall']
-            #f1 = metrics['f1']
-
-            # Print summary for the current pairs file
-            print(f"Summary for {pairs_file} with {noise_factor} masks:")
-            print(f"  Accuracy: {accuracy:.4f}")
-            print(f"  Precision: {precision:.4f}")
-            print(f"  Recall: {recall:.4f}")
-            print(f"  F1 Score: {f1:.4f}\n")
-
-        # Calculate average metrics for this noise level
-        for metric in ['accuracy', 'precision', 'recall', 'f1']:
-            metric_values = [m[metric] for m in all_metrics]
-            avg_metrics[noise_factor][metric] = np.mean(metric_values)
-
-    save_directory = "noise-masking_plot"
+    # Plotting the results
+    save_directory = "threshold-mask-masking_plot"
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
 
-    for metric_name in ['accuracy', 'precision', 'recall', 'f1']:
-        plt.figure()
-        noise_factors = list(noise_levels)
-        metric_values = [avg_metrics[noise][metric_name] for noise in noise_levels]
-        plt.plot(noise_factors, metric_values, marker='o', linestyle='-')
-        plt.title(f"{metric_name.capitalize()} vs. Noise Level")
-        plt.xlabel("Noise Level")
-        plt.ylabel(metric_name.capitalize())
-        plt.grid(True)
-        plt.savefig(os.path.join(save_directory, f"{metric_name}_vs_noise_level.png"))
-        plt.close()
-"""
+    plt.figure()
+    for mask_thickness in mask_thickness_levels:
+        plt.plot(thresholds, avg_accuracy_per_thickness_level[mask_thickness], marker='o', linestyle='-', label=f'Mask Thickness {mask_thickness:.1f}')
+
+    plt.title("Accuracy vs. Threshold for Different Mask Thicknesses")
+    plt.xlabel("Threshold")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold_for_mask_thicknesses.png"))
+    plt.close()
 if __name__ == "__main__":
     main()
