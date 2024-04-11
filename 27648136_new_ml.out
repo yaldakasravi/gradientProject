@@ -100,3 +100,119 @@ WARNING:tensorflow:No training configuration found in the save file, so the mode
 Relying on driver to perform ptx compilation. 
 Modify $PATH to customize ptxas location.
 This message will be only logged once.
+  Accuracy: 0.5500
+  Precision: 0.5272
+  Recall: 0.9720
+  F1 Score: 0.6836
+
+  Accuracy: 0.5480
+  Precision: 0.5264
+  Recall: 0.9577
+  F1 Score: 0.6794
+
+  Accuracy: 0.5580
+  Precision: 0.5324
+  Recall: 0.9553
+  F1 Score: 0.6837
+
+  Accuracy: 0.5597
+  Precision: 0.5336
+  Recall: 0.9477
+  F1 Score: 0.6828
+
+  Accuracy: 0.5547
+  Precision: 0.5313
+  Recall: 0.9287
+  F1 Score: 0.6759
+
+  Accuracy: 0.5682
+  Precision: 0.5399
+  Recall: 0.9260
+  F1 Score: 0.6820
+
+  Accuracy: 0.5608
+  Precision: 0.5359
+  Recall: 0.9083
+  F1 Score: 0.6741
+
+  Accuracy: 0.5597
+  Precision: 0.5359
+  Recall: 0.8927
+  F1 Score: 0.6697
+
+  Accuracy: 0.5605
+  Precision: 0.5371
+  Recall: 0.8783
+  F1 Score: 0.6665
+
+  Accuracy: 0.5562
+  Precision: 0.5346
+  Recall: 0.8683
+  F1 Score: 0.6617
+
+  Accuracy: 0.5927
+  Precision: 0.5550
+  Recall: 0.9383
+  F1 Score: 0.6974
+
+  Accuracy: 0.5940
+  Precision: 0.5574
+  Recall: 0.9143
+  F1 Score: 0.6926
+
+  Accuracy: 0.6040
+  Precision: 0.5650
+  Recall: 0.9050
+  F1 Score: 0.6956
+
+  Accuracy: 0.5987
+  Precision: 0.5633
+  Recall: 0.8797
+  F1 Score: 0.6868
+
+  Accuracy: 0.6078
+  Precision: 0.5710
+  Recall: 0.8690
+  F1 Score: 0.6891
+
+  Accuracy: 0.6045
+  Precision: 0.5719
+  Recall: 0.8363
+  F1 Score: 0.6792
+
+  Accuracy: 0.5962
+  Precision: 0.5676
+  Recall: 0.8107
+  F1 Score: 0.6676
+
+  Accuracy: 0.5955
+  Precision: 0.5694
+  Recall: 0.7830
+  F1 Score: 0.6593
+
+  Accuracy: 0.5990
+  Precision: 0.5743
+  Recall: 0.7650
+  F1 Score: 0.6561
+
+  Accuracy: 0.5847
+  Precision: 0.5668
+  Recall: 0.7227
+  F1 Score: 0.6352
+
+  Accuracy: 0.6445
+  Precision: 0.5987
+  Recall: 0.8773
+  F1 Score: 0.7116
+
+  Accuracy: 0.6455
+  Precision: 0.6037
+  Recall: 0.8497
+  F1 Score: 0.7057
+
+  Accuracy: 0.6478
+  Precision: 0.6118
+  Recall: 0.8100
+  F1 Score: 0.6970
+
+slurmstepd: error: *** JOB 27648136 ON ng20602 CANCELLED AT 2024-04-10T22:56:27 DUE TO TIME LIMIT ***

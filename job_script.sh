@@ -24,5 +24,5 @@ pip install --no-index comet_ml
 #python noise-masking.py
 #python comet_perturb-oneSide.py
 #python noise-masking-oneSide.py
-#python masking-oneSide.py 
-python random-noise-oneSide.py
+python masking-oneSide.py 
+#python random-noise-oneSide.py

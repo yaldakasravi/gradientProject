@@ -104,3 +104,52 @@ Mask Thickness: 0.1, Threshold: 0.3
   Accuracy: 0.5023
 Mask Thickness: 0.2, Threshold: 0.3
   Accuracy: 0.5015
+Mask Thickness: 0.30000000000000004, Threshold: 0.3
+  Accuracy: 0.5002
+Mask Thickness: 0.4, Threshold: 0.3
+  Accuracy: 0.5000
+Mask Thickness: 0.5, Threshold: 0.3
+  Accuracy: 0.5000
+Mask Thickness: 0.6, Threshold: 0.3
+  Accuracy: 0.5000
+Mask Thickness: 0.7000000000000001, Threshold: 0.3
+  Accuracy: 0.5000
+Mask Thickness: 0.8, Threshold: 0.3
+  Accuracy: 0.5000
+Mask Thickness: 0.9, Threshold: 0.3
+  Accuracy: 0.5000
+Mask Thickness: 1.0, Threshold: 0.3
+  Accuracy: 0.5000
+Mask Thickness: 0.1, Threshold: 0.3538461538461538
+  Accuracy: 0.5055
+Mask Thickness: 0.2, Threshold: 0.3538461538461538
+  Accuracy: 0.5058
+Mask Thickness: 0.30000000000000004, Threshold: 0.3538461538461538
+  Accuracy: 0.5005
+Mask Thickness: 0.4, Threshold: 0.3538461538461538
+  Accuracy: 0.5000
+Mask Thickness: 0.5, Threshold: 0.3538461538461538
+  Accuracy: 0.5002
+Mask Thickness: 0.6, Threshold: 0.3538461538461538
+  Accuracy: 0.5000
+Mask Thickness: 0.7000000000000001, Threshold: 0.3538461538461538
+  Accuracy: 0.5000
+Mask Thickness: 0.8, Threshold: 0.3538461538461538
+  Accuracy: 0.5000
+Mask Thickness: 0.9, Threshold: 0.3538461538461538
+  Accuracy: 0.5000
+Mask Thickness: 1.0, Threshold: 0.3538461538461538
+  Accuracy: 0.5000
+Mask Thickness: 0.1, Threshold: 0.4076923076923077
+  Accuracy: 0.5173
+Mask Thickness: 0.2, Threshold: 0.4076923076923077
+  Accuracy: 0.5123
+Mask Thickness: 0.30000000000000004, Threshold: 0.4076923076923077
+  Accuracy: 0.5028
+Mask Thickness: 0.4, Threshold: 0.4076923076923077
+  Accuracy: 0.5003
+Mask Thickness: 0.5, Threshold: 0.4076923076923077
+  Accuracy: 0.5002
+Mask Thickness: 0.6, Threshold: 0.4076923076923077
+  Accuracy: 0.5003
+slurmstepd: error: *** JOB 27646063 ON ng20604 CANCELLED AT 2024-04-10T22:34:31 DUE TO TIME LIMIT ***

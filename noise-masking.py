@@ -7,6 +7,7 @@ from tensorflow.keras.models import load_model
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cosine
 import tensorflow as tf
+from tensorflow.data import Dataset
 
 # Initialize your Comet ML experiment here
 experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking_effect", workspace="enhancing-gradient")
@@ -197,7 +198,7 @@ def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
         return (img1, img2), label
 
     # Use a lambda to ensure the function takes a single argument
-    pairs_dataset = lines_dataset.map(lambda file_path1, file_path2, label: load_and_preprocess((file_path1, file_path2, label)))
+    pairs_dataset = lines_dataset.map(load_and_preprocess)
     return pairs_dataset
 
 def compute_similarity(embedding1, embedding2):
