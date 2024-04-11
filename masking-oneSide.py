@@ -151,41 +151,46 @@ if __name__ == "__main__":
 
 #using dataloader to be faster 
 
-def preprocess_image_without_mask(image_path):
-    # Load and preprocess the image without applying a mask
+def preprocess_image_with_mask(image_path, mask_thickness):
+    # Load the image
     img = image.load_img(image_path, target_size=(112, 112))
     img_array = image.img_to_array(img)
+
+    # Assuming a simple mask application, adjust this logic as needed
+    # For example, applying a horizontal mask:
+    height = img_array.shape[0]
+    mask_height = int(height * mask_thickness)
+    start = (height - mask_height) // 2
+    end = start + mask_height
+    img_array[start:end, :, :] = 0  # Apply mask by zeroing out the central part
+
     img_array = preprocess_input(img_array)
     return img_array
 
-def tf_preprocess_image_without_mask(image_path):
-    # TensorFlow wrapper to preprocess the image without a mask
-    return tf.numpy_function(preprocess_image_without_mask, [image_path], tf.float32)
+def tf_preprocess_image(image_path, mask_thickness):
+    # TensorFlow wrapper to preprocess the image with a mask
+    return tf.numpy_function(preprocess_image_with_mask, [image_path, mask_thickness], tf.float32)
 
 def get_embedding(model, image_path, mask_thickness):
     processed_image = tf_preprocess_image(image_path, mask_thickness)
     processed_image.set_shape((112, 112, 3))
     return model.predict(tf.expand_dims(processed_image, axis=0))
 
-# Modify evaluate_lfw to use a TensorFlow data pipeline for loading and preprocessing images
 def evaluate_lfw(model, dataset_dir, pairs_file_path, mask_thickness):
-    # Implement function to parse pairs file and return a dataset
     def parse_pairs(pairs_file_path):
         with open(pairs_file_path, 'r') as f:
             lines = [line.strip() for line in f.readlines() if line.strip()]
-        # Assuming each block of 4 lines in the pairs file corresponds to two pairs of images
         for i in range(0, len(lines), 4):
             yield os.path.join(dataset_dir, lines[i]), os.path.join(dataset_dir, lines[i+1]), 1  # Same person
             yield os.path.join(dataset_dir, lines[i+2]), os.path.join(dataset_dir, lines[i+3]), 0  # Different people
 
-    # Create a dataset from the pairs
-    pairs_dataset = tf.data.Dataset.from_generator(lambda: parse_pairs(pairs_file_path),
-                                           output_types=(tf.string, tf.string, tf.int32))
+    pairs_dataset = tf.data.Dataset.from_generator(
+        lambda: parse_pairs(pairs_file_path),
+        output_types=(tf.string, tf.string, tf.int32))
 
-    # Map preprocessing
     def process_path(img_path1, img_path2, label):
-        return (tf_preprocess_image(img_path1, mask_thickness),
-                tf_preprocess_image_without_mask(img_path2)), label  # Apply mask to img1, load img2 without mask
+        return ((tf_preprocess_image(img_path1, mask_thickness), 
+                 tf_preprocess_image_without_mask(img_path2)), label)
 
     pairs_dataset = pairs_dataset.map(process_path, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 

@@ -188,26 +188,41 @@ def load_and_preprocess_image(image_path, mask_thickness, dataset_dir):
         print(f"Error loading image {image_path}: {e}")
         return None
 
-    try:
-        all_person_dirs = [os.path.join(dataset_dir, d) for d in os.listdir(dataset_dir) if os.path.isdir(os.path.join(dataset_dir, d))]
-        current_person_dir = os.path.dirname(image_path)
-        all_person_dirs = [d for d in all_person_dirs if d != current_person_dir]
-        if not all_person_dirs:
-            return None
-        different_person_dir = random.choice(all_person_dirs)
-        all_images = [f for f in os.listdir(different_person_dir) if os.path.isfile(os.path.join(different_person_dir, f))]
-        if not all_images:
-            return None
-        swap_image_path = os.path.join(different_person_dir, random.choice(all_images))
-        swap_img = image.load_img(swap_image_path, target_size=(112, 112))
-        swap_img_array = image.img_to_array(swap_img)
-        num_rows_to_swap = int(112 * mask_thickness)
-        start_row = (112 - num_rows_to_swap) // 2
-        end_row = start_row + num_rows_to_swap
-        img_array[start_row:end_row, :, :] = swap_img_array[start_row:end_row, :, :]
-    except Exception as e:
-        print(f"Error processing image for swap: {e}")
+    def find_directory_with_images(base_dir, current_dir):
+        try:
+            all_person_dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d)) and d != os.path.basename(current_dir)]
+            if not all_person_dirs:
+                print("No alternative directories available.")
+                return None
+
+            while all_person_dirs:
+                chosen_dir = random.choice(all_person_dirs)
+                all_images = [f for f in os.listdir(chosen_dir) if os.path.isfile(os.path.join(chosen_dir, f))]
+                if all_images:
+                    return chosen_dir, all_images
+                else:
+                    all_person_dirs.remove(chosen_dir)  # Remove the directory with no images and try another
+
+        except FileNotFoundError as e:
+            print(f"Directory not found: {e}")
+        return None, None
+
+    current_person_dir = os.path.dirname(image_path)
+    different_person_dir, all_images = find_directory_with_images(dataset_dir, current_person_dir)
+
+    if not different_person_dir:
+        print(f"No valid images found in any directories under {dataset_dir}")
         return None
+
+    swap_image_path = os.path.join(different_person_dir, random.choice(all_images))
+    swap_img = image.load_img(swap_image_path, target_size=(112, 112))
+    swap_img_array = image.img_to_array(swap_img)
+
+    # Define the number of rows to swap based on the mask thickness
+    num_rows_to_swap = int(112 * mask_thickness)
+    start_row = (112 - num_rows_to_swap) // 2
+    end_row = start_row + num_rows_to_swap
+    img_array[start_row:end_row, :, :] = swap_img_array[start_row:end_row, :, :]
 
     img_array_expanded_dims = np.expand_dims(img_array, axis=0)
     return preprocess_input(img_array_expanded_dims)
@@ -250,14 +265,15 @@ def evaluate_lfw(model, dataset_dir, pairs_files, mask_thickness):
             labels.append(1 if "same" in pairs_file else 0)
     return np.array(labels), np.array(similarities)
 
-def calculate_metrics(labels, similarities,threshold):
+def calculate_metrics(labels, similarities, threshold):
     predictions = similarities >= threshold
     tp = np.sum((predictions == 1) & (labels == 1))
     tn = np.sum((predictions == 0) & (labels == 0))
     fp = np.sum((predictions == 1) & (labels == 0))
     fn = np.sum((predictions == 0) & (labels == 1))
 
-    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    total = tp + tn + fp + fn
+    accuracy = (tp + tn) / total if total > 0 else 0
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
@@ -292,19 +308,22 @@ def main():
 
     # Plotting
     save_directory = "threshold-swap-differentPerson_plot"
-    os.makedirs(save_directory, exist_ok=True)
-
-    # Plot accuracy for each mask thickness
-    for mask_thickness, metrics in avg_metrics.items():
-        plt.figure()
-        plt.plot(thresholds, metrics['accuracy'], marker='o', linestyle='-', label=f'Mask Thickness {mask_thickness}')
-        plt.title("Accuracy vs. Threshold for Mask Thickness {:.2f}".format(mask_thickness))
-        plt.xlabel("Threshold")
-        plt.ylabel("Accuracy")
-        plt.legend(loc='best')
-        plt.grid(True)
-        plt.savefig(os.path.join(save_directory, f"accuracy_vs_threshold_mask_thickness_{mask_thickness:.2f}.png"))
-        plt.close()
+    if not os.path.exists(save_directory):
+        os.makedirs(save_directory)
+    
+    plt.figure()
+    for mask_thickness in mask_thickness_levels:
+        plt.plot(thresholds, avg_accuracy_per_thickness_level[mask_thickness], marker='o', linestyle='-', label=f'Thickness {mask_thickness:.1f}')
+        
+    plt.figure()
+    plt.plot(thresholds, metrics['accuracy'], marker='o', linestyle='-', label=f'Mask Thickness {mask_thickness}')
+    plt.title("Accuracy vs. Threshold for Mask Thickness {:.2f}".format(mask_thickness))
+    plt.xlabel("Threshold")
+    plt.ylabel("Accuracy")
+    plt.legend(loc='best')
+    plt.grid(True)
+    plt.savefig(os.path.join(save_directory, f"accuracy_vs_threshold_mask_thickness_{mask_thickness:.2f}.png"))
+    plt.close()
 
 if __name__ == "__main__":
     main()

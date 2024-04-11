@@ -190,6 +190,10 @@ def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
 
     lines_dataset = tf.data.TextLineDataset(pairs_file_path).map(parse_function)
 
+    # Debugging: Print out the structure of dataset elements
+    for element in lines_dataset.take(1):
+        print(element)
+
     def load_and_preprocess(pair):
         # Unpack the tuple
         file_path1, file_path2, label = pair
@@ -198,7 +202,7 @@ def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
         return (img1, img2), label
 
     # Use a lambda to ensure the function takes a single argument
-    pairs_dataset = lines_dataset.map(lambda pair: load_and_preprocess(pair))
+    pairs_dataset = lines_dataset.map(lambda pair: load_and_preprocess((pair[0], pair[1], pair[2])))
     return pairs_dataset
 
 def compute_similarity(embedding1, embedding2):

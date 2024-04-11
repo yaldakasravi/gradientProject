@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH --account=def-ahafid # Use 'rrg' account for better chance to run GPU
-#SBATCH --time=04:00:00  # Time you think your experiment will take. Experiment gets killed if this time is exceeded. Shorter experiments usually get priority in queue.
+#SBATCH --time=05:00:00  # Time you think your experiment will take. Experiment gets killed if this time is exceeded. Shorter experiments usually get priority in queue.
 #SBATCH --ntasks=1 # Number of tasks per node. Generally keep as 1.
 #SBATCH --cpus-per-task=4           # CPU cores/threads. 3.5 cores / gpu is standard.
 #SBATCH --gres=gpu:a100:1                  # Number of GPUs (per node)
@@ -24,5 +24,6 @@ pip install --no-index comet_ml
 #python noise-masking.py
 #python comet_perturb-oneSide.py
 #python noise-masking-oneSide.py
-python masking-oneSide.py 
-#python random-noise-oneSide.py
+#python masking-oneSide.py 
+python random-noise-oneSide.py
+#python random-masking-oneSide.py
