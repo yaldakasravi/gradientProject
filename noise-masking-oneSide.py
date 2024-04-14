@@ -179,31 +179,24 @@ def preprocess_image(image_path, noise_factor):
 def get_embedding(model, processed_image):
     return model.predict(tf.expand_dims(processed_image, axis=0))
 
-def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
-    def parse_function(line):
-        parts = tf.strings.split(line)
-        # Ensure file paths are joined with dataset_dir properly
-        file1_path = tf.strings.join([dataset_dir, '/', parts[0]], separator='')
-        file2_path = tf.strings.join([dataset_dir, '/', parts[1]], separator='')
-        label = tf.strings.to_number(parts[2], tf.int32)
-        return file1_path, file2_path, label
+def parse_function(line):
+    parts = tf.strings.split(line)
+    if tf.shape(parts)[0] < 3:
+        print(f"Skipping malformed line: {line.numpy()}")
+        return None, None, None
+    file1_path = tf.strings.join([dataset_dir, parts[0]], separator='/')
+    file2_path = tf.strings.join([dataset_dir, parts[1]], separator='/')
+    label = tf.strings.to_number(parts[2], out_type=tf.int32)
+    return file1_path, file2_path, label
 
-    lines_dataset = tf.data.TextLineDataset(pairs_file_path).map(parse_function)
+def filter_valid_data(file1_path, file2_path, label):
+    return tf.logical_and(tf.strings.length(file1_path) > 0, tf.strings.length(file2_path) > 0)
 
-    # Debugging: Print out the structure of dataset elements
-    for element in lines_dataset.take(1):
-        print(element)
-
-    def load_and_preprocess(pair):
-        # Unpack the tuple
-        file_path1, file_path2, label = pair
-        img1 = preprocess_image(file_path1, noise_factor)
-        img2 = preprocess_image(file_path2, 0)
-        return (img1, img2), label
-
-    # Use a lambda to ensure the function takes a single argument
-    pairs_dataset = lines_dataset.map(lambda pair: load_and_preprocess((pair[0], pair[1], pair[2])))
-    return pairs_dataset
+def create_pairs_dataset(pairs_file_path, dataset_dir):
+    lines_dataset = tf.data.TextLineDataset(pairs_file_path)
+    parsed_dataset = lines_dataset.map(parse_function)
+    valid_dataset = parsed_dataset.filter(filter_valid_data)  # Filter out invalid data
+    return valid_dataset
 
 def compute_similarity(embedding1, embedding2):
     # Cosine similarity function
@@ -215,6 +208,7 @@ def compute_similarity(embedding1, embedding2):
 def main():
     with tf.device('/GPU:0'):
         model = load_model(model_path)
+        pairs_dataset = create_pairs_dataset(pairs_file_path, dataset_dir)
         thresholds = np.linspace(0.3, 1, num=14)
         noise_levels = np.linspace(0.0, 1.0, num=11)
 

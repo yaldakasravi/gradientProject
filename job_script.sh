@@ -18,12 +18,12 @@ pip install --no-index comet_ml
 #python comet_perturb.py
 #python masking.py
 #python random-masking.py
-#python swap.py
+python swap.py
 #python swap-sameperson.py
 #python lfw.py
 #python noise-masking.py
 #python comet_perturb-oneSide.py
 #python noise-masking-oneSide.py
 #python masking-oneSide.py 
-python random-noise-oneSide.py
+#python random-noise-oneSide.py
 #python random-masking-oneSide.py

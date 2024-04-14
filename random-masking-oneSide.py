@@ -7,6 +7,7 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.models import load_model
 from scipy.spatial.distance import cosine
 import matplotlib.pyplot as plt
+from comet_ml import Experiment
 
 # Initialize your Comet ML experiment here
 experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="random-square-masking_effect", workspace="enhancing-gradient")

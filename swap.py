@@ -189,22 +189,12 @@ def load_and_preprocess_image(image_path, mask_thickness, dataset_dir):
         return None
 
     def find_directory_with_images(base_dir, current_dir):
-        try:
-            all_person_dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d)) and d != os.path.basename(current_dir)]
-            if not all_person_dirs:
-                print("No alternative directories available.")
-                return None
-
-            while all_person_dirs:
-                chosen_dir = random.choice(all_person_dirs)
-                all_images = [f for f in os.listdir(chosen_dir) if os.path.isfile(os.path.join(chosen_dir, f))]
-                if all_images:
-                    return chosen_dir, all_images
-                else:
-                    all_person_dirs.remove(chosen_dir)  # Remove the directory with no images and try another
-
-        except FileNotFoundError as e:
-            print(f"Directory not found: {e}")
+        all_person_dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d)) and d != os.path.basename(current_dir)]
+        random.shuffle(all_person_dirs)
+        for chosen_dir in all_person_dirs:
+            all_images = [f for f in os.listdir(chosen_dir) if os.path.isfile(os.path.join(chosen_dir, f))]
+            if all_images:
+                return chosen_dir, all_images
         return None, None
 
     current_person_dir = os.path.dirname(image_path)
@@ -218,7 +208,6 @@ def load_and_preprocess_image(image_path, mask_thickness, dataset_dir):
     swap_img = image.load_img(swap_image_path, target_size=(112, 112))
     swap_img_array = image.img_to_array(swap_img)
 
-    # Define the number of rows to swap based on the mask thickness
     num_rows_to_swap = int(112 * mask_thickness)
     start_row = (112 - num_rows_to_swap) // 2
     end_row = start_row + num_rows_to_swap
@@ -229,14 +218,12 @@ def load_and_preprocess_image(image_path, mask_thickness, dataset_dir):
 
 def preprocess_dataset(pairs, mask_thickness, dataset_dir):
     processed_imgs = []
-    for pair in pairs:
-        for image_path in pair:
-            img = load_and_preprocess_image(image_path, mask_thickness, dataset_dir)
-            if img is not None:
-                processed_imgs.append(img)
-    if not processed_imgs:
-        return None
-    return np.vstack(processed_imgs)
+    for image_path1, image_path2 in pairs:
+        img1 = load_and_preprocess_image(image_path1, mask_thickness, dataset_dir)
+        img2 = load_and_preprocess_image(image_path2, mask_thickness, dataset_dir)
+        if img1 is not None and img2 is not None:
+            processed_imgs.extend([img1, img2])
+    return np.vstack(processed_imgs) if processed_imgs else None
 
 def read_pairs_file(pairs_file_path, dataset_dir):
     pairs = []
@@ -272,59 +259,49 @@ def calculate_metrics(labels, similarities, threshold):
     fp = np.sum((predictions == 1) & (labels == 0))
     fn = np.sum((predictions == 0) & (labels == 1))
 
-    total = tp + tn + fp + fn
-    accuracy = (tp + tn) / total if total > 0 else 0
+    accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
 
-    return {
-        'accuracy': accuracy,
-        'precision': precision,
-        'recall': recall,
-        'f1': f1
-    }
+    return {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1': f1}
 
 def main():
     model = load_model(model_path)
     thresholds = np.linspace(0.3, 1, num=14)
     mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
 
-    # Collect all metrics in a dictionary
-    avg_metrics = {mask_thickness: {'accuracy': [], 'precision': [], 'recall': [], 'f1': []} for mask_thickness in mask_thickness_levels}
+    all_metrics = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
+    metrics_per_thickness = {thickness: {metric: [] for metric in all_metrics} for thickness in mask_thickness_levels}
 
+    # Evaluate each mask thickness
     for mask_thickness in mask_thickness_levels:
-        # Prepare pairs file paths
-        pairs_file_paths = [[os.path.join(dataset_dir, f'pair_{idx}.jpg') for idx in range(4)] for _ in pairs_files]  # Adjust with your actual logic for pairs
-
-        # Evaluate LFW dataset
         labels, similarities = evaluate_lfw(model, dataset_dir, pairs_files, mask_thickness)
-
-        # Calculate metrics
+        # Collect metrics for each threshold
         for threshold in thresholds:
             metrics = calculate_metrics(labels, similarities, threshold)
-            for metric in metrics:
-                avg_metrics[mask_thickness][metric].append(metrics[metric])
+            for metric in all_metrics:
+                metrics_per_thickness[mask_thickness][metric].append(metrics[metric])
 
     # Plotting
     save_directory = "threshold-swap-differentPerson_plot"
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
-    
-    plt.figure()
-    for mask_thickness in mask_thickness_levels:
-        plt.plot(thresholds, avg_accuracy_per_thickness_level[mask_thickness], marker='o', linestyle='-', label=f'Thickness {mask_thickness:.1f}')
-        
-    plt.figure()
-    plt.plot(thresholds, metrics['accuracy'], marker='o', linestyle='-', label=f'Mask Thickness {mask_thickness}')
-    plt.title("Accuracy vs. Threshold for Mask Thickness {:.2f}".format(mask_thickness))
-    plt.xlabel("Threshold")
-    plt.ylabel("Accuracy")
-    plt.legend(loc='best')
-    plt.grid(True)
-    plt.savefig(os.path.join(save_directory, f"accuracy_vs_threshold_mask_thickness_{mask_thickness:.2f}.png"))
-    plt.close()
+    os.makedirs(save_directory, exist_ok=True)
 
+    plt.figure(figsize=(14, 10))
+    for metric in all_metrics:
+        plt.clf()  # Clear the current figure
+        for mask_thickness, metrics in metrics_per_thickness.items():
+            plt.plot(thresholds, metrics[metric], marker='o', linestyle='-', label=f'Mask Thickness {mask_thickness:.2f}')
+        
+        plt.title(f'{metric.capitalize()} vs. Threshold for Various Mask Thicknesses')
+        plt.xlabel('Threshold')
+        plt.ylabel(metric.capitalize())
+        plt.legend(title='Mask Thickness', loc='best')
+        plt.grid(True)
+        save_path = os.path.join('plot_outputs', f'{metric}_vs_threshold.png')
+        if not os.path.exists('plot_outputs'):
+            os.makedirs('plot_outputs')
+        plt.savefig(save_path)
+        print(f'Plot saved to {save_path}')
 if __name__ == "__main__":
     main()
-

@@ -100,3 +100,94 @@ WARNING:tensorflow:No training configuration found in the save file, so the mode
 Relying on driver to perform ptx compilation. 
 Modify $PATH to customize ptxas location.
 This message will be only logged once.
+  Accuracy: 0.5475
+  Precision: 0.5257
+  Recall: 0.9737
+  F1 Score: 0.6827
+
+  Accuracy: 0.5507
+  Precision: 0.5279
+  Recall: 0.9613
+  F1 Score: 0.6815
+
+  Accuracy: 0.5573
+  Precision: 0.5321
+  Recall: 0.9517
+  F1 Score: 0.6826
+
+  Accuracy: 0.5540
+  Precision: 0.5306
+  Recall: 0.9370
+  F1 Score: 0.6775
+
+  Accuracy: 0.5548
+  Precision: 0.5314
+  Recall: 0.9290
+  F1 Score: 0.6760
+
+  Accuracy: 0.5652
+  Precision: 0.5381
+  Recall: 0.9220
+  F1 Score: 0.6795
+
+  Accuracy: 0.5662
+  Precision: 0.5391
+  Recall: 0.9133
+  F1 Score: 0.6780
+
+  Accuracy: 0.5622
+  Precision: 0.5373
+  Recall: 0.8973
+  F1 Score: 0.6721
+
+  Accuracy: 0.5633
+  Precision: 0.5385
+  Recall: 0.8880
+  F1 Score: 0.6704
+
+  Accuracy: 0.5592
+  Precision: 0.5369
+  Recall: 0.8603
+  F1 Score: 0.6611
+
+  Accuracy: 0.5933
+  Precision: 0.5553
+  Recall: 0.9397
+  F1 Score: 0.6980
+
+  Accuracy: 0.5983
+  Precision: 0.5601
+  Recall: 0.9190
+  F1 Score: 0.6959
+
+  Accuracy: 0.5980
+  Precision: 0.5614
+  Recall: 0.8977
+  F1 Score: 0.6907
+
+  Accuracy: 0.6002
+  Precision: 0.5640
+  Recall: 0.8860
+  F1 Score: 0.6891
+
+  Accuracy: 0.6032
+  Precision: 0.5681
+  Recall: 0.8610
+  F1 Score: 0.6845
+
+  Accuracy: 0.6023
+  Precision: 0.5699
+  Recall: 0.8343
+  F1 Score: 0.6772
+
+  Accuracy: 0.5945
+  Precision: 0.5664
+  Recall: 0.8083
+  F1 Score: 0.6660
+
+  Accuracy: 0.5993
+  Precision: 0.5727
+  Recall: 0.7850
+  F1 Score: 0.6621
+
+slurmstepd: error: *** JOB 27675043 ON ng20401 CANCELLED AT 2024-04-12T00:53:47 DUE TO TIME LIMIT ***

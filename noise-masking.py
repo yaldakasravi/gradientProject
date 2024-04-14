@@ -182,23 +182,20 @@ def get_embedding(model, processed_image):
 def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
     def parse_function(line):
         parts = tf.strings.split(line)
-        # Ensure file paths are joined with dataset_dir properly
-        file1_path = tf.strings.join([dataset_dir, '/', parts[0]], separator='')
-        file2_path = tf.strings.join([dataset_dir, '/', parts[1]], separator='')
+        file1_path = tf.strings.join([dataset_dir, parts[0]], separator='/')
+        file2_path = tf.strings.join([dataset_dir, parts[1]], separator='/')
         label = tf.strings.to_number(parts[2], tf.int32)
-        return (file1_path, file2_path, label)  # Ensure this returns a tuple
+        return (file1_path, file2_path, label)  # Return a single tuple
 
     lines_dataset = tf.data.TextLineDataset(pairs_file_path).map(parse_function)
 
     def load_and_preprocess(pair):
-        # Unpack the tuple
         file_path1, file_path2, label = pair
         img1 = preprocess_image(file_path1, noise_factor)
         img2 = preprocess_image(file_path2, noise_factor)
         return (img1, img2), label
 
-    # Ensure lambda function passes a single tuple to the load_and_preprocess function
-    pairs_dataset = lines_dataset.map(lambda pair: load_and_preprocess((pair[0], pair[1], pair[2])))
+    pairs_dataset = lines_dataset.map(load_and_preprocess)  # Map without additional lambda
     return pairs_dataset
 
 def compute_similarity(embedding1, embedding2):
