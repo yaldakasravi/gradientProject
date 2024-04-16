@@ -161,100 +161,83 @@ if __name__ == "__main__":
 
 #faster with dataloader 
 
-def preprocess_image(image_path, noise_factor):
-    img = tf.io.read_file(image_path)
+def preprocess_image(file_path, noise_factor):
+    img = tf.io.read_file(file_path)
     img = tf.image.decode_jpeg(img, channels=3)
     img = tf.image.resize(img, [112, 112])
-    img = tf.cast(img, tf.float32) / 255.0  # Normalize the image to [0, 1]
+    img = tf.cast(img, tf.float32) / 255.0
 
     # Add Gaussian noise
     noise = tf.random.normal(shape=tf.shape(img), mean=0.0, stddev=noise_factor, dtype=tf.float32)
-    img = img + noise
-    img = tf.clip_by_value(img, clip_value_min=0.0, clip_value_max=1.0)
+    img += noise
+    img = tf.clip_by_value(img, 0.0, 1.0)
 
-    # Preprocess the image for the model
-    img = preprocess_input(img)
-    return img
+    return preprocess_input(img)
 
-def get_embedding(model, processed_image):
-    return model.predict(tf.expand_dims(processed_image, axis=0))
+def load_and_process_images(file_path1, file_path2, label, noise_factor):
+    img1 = preprocess_image(file_path1, noise_factor)
+    img2 = preprocess_image(file_path2, noise_factor)
+    return (img1, img2), label
 
-def parse_function(line):
-    parts = tf.strings.split(line)
-    if tf.shape(parts)[0] < 3:
-        print(f"Skipping malformed line: {line.numpy()}")
-        return None, None, None
-    file1_path = tf.strings.join([dataset_dir, parts[0]], separator='/')
-    file2_path = tf.strings.join([dataset_dir, parts[1]], separator='/')
-    label = tf.strings.to_number(parts[2], out_type=tf.int32)
-    return file1_path, file2_path, label
+def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
+    def parse_function(line):
+        parts = tf.strings.split(line)
+        file1_path = tf.strings.join([dataset_dir, parts[0]], separator='/')
+        file2_path = tf.strings.join([dataset_dir, parts[1]], separator='/')
+        label = tf.strings.to_number(parts[2], out_type=tf.int32)
+        return file1_path, file2_path, label
 
-def filter_valid_data(file1_path, file2_path, label):
-    return tf.logical_and(tf.strings.length(file1_path) > 0, tf.strings.length(file2_path) > 0)
+    dataset = tf.data.TextLineDataset(pairs_file_path)
+    dataset = dataset.map(parse_function, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    dataset = dataset.map(lambda x, y, z: load_and_process_images(x, y, z, noise_factor), num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    return dataset
 
-def create_pairs_dataset(pairs_file_path, dataset_dir):
-    lines_dataset = tf.data.TextLineDataset(pairs_file_path)
-    parsed_dataset = lines_dataset.map(parse_function)
-    valid_dataset = parsed_dataset.filter(filter_valid_data)  # Filter out invalid data
-    return valid_dataset
+def get_embeddings(model, images):
+    return model.predict(images, batch_size=32)  # Process images in batches
 
-def compute_similarity(embedding1, embedding2):
-    # Cosine similarity function
-    dot_product = tf.reduce_sum(embedding1 * embedding2, axis=1)
-    norm_product = tf.norm(embedding1, axis=1) * tf.norm(embedding2, axis=1)
-    return 1 - dot_product / norm_product
+def compute_similarity(embeddings1, embeddings2):
+    dot_product = tf.reduce_sum(embeddings1 * embeddings2, axis=1)
+    norm_product = tf.norm(embeddings1, axis=1) * tf.norm(embeddings2, axis=1)
+    similarity = 1 - dot_product / norm_product
+    return similarity
 
-# Adjust the main function
 def main():
-    with tf.device('/GPU:0'):
-        model = load_model(model_path)
-        pairs_dataset = create_pairs_dataset(pairs_file_path, dataset_dir)
-        thresholds = np.linspace(0.3, 1, num=14)
-        noise_levels = np.linspace(0.0, 1.0, num=11)
+    model = load_model(model_path)
+    thresholds = np.linspace(0.3, 1, num=14)
+    noise_levels = np.linspace(0.0, 1.0, num=11)
 
-        avg_accuracy_per_noise_level = {noise: [] for noise in noise_levels}
+    for noise_factor in noise_levels:
+        for pairs_file in pairs_files:
+            pairs_dataset = create_pairs_dataset(pairs_file, dataset_dir, noise_factor)
+            pairs_dataset = pairs_dataset.batch(32).prefetch(tf.data.experimental.AUTOTUNE)
 
-        for noise_factor in noise_levels:
-            metrics_per_threshold = {th: [] for th in thresholds}
+            for (img1, img2), labels in pairs_dataset:
+                embeddings1 = get_embeddings(model, img1)
+                embeddings2 = get_embeddings(model, img2)
+                similarities = compute_similarity(embeddings1, embeddings2)
 
-            for pairs_file in pairs_files:
-                pairs_file_path = os.path.join(pairs_files_base, pairs_file)
-                pairs_dataset = create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor).batch(32)
+                accuracies = []
+                for threshold in thresholds:
+                    predictions = similarities >= threshold
+                    accuracy = tf.reduce_mean(tf.cast(predictions == labels, tf.float32))
+                    accuracies.append(accuracy.numpy())
 
-                for images, labels in pairs_dataset:
-                    img1, img2 = images
-                    embeddings1 = get_embedding(model, img1)
-                    embeddings2 = get_embedding(model, img2)
-                    similarities = compute_similarity(embeddings1, embeddings2).numpy()
+                print(f"Noise {noise_factor}, File {pairs_file}: Mean Accuracy {np.mean(accuracies):.4f}")
 
-                    for th in thresholds:
-                        predictions = similarities >= th
-                        accuracy = np.mean(predictions == labels.numpy())
-                        metrics_per_threshold[th].append(accuracy)
+    # Plotting
+    save_directory = "threshold-mask-noise-oneSide_plot"
+    os.makedirs(save_directory, exist_ok=True)
 
-            # Compute the average metrics for this noise level
-            for th, accuracies in metrics_per_threshold.items():
-                avg_accuracy = np.mean(accuracies)
-                avg_accuracy_per_noise_level[noise_factor].append(avg_accuracy)
-
-            print(f"Summary for noise level {noise_factor}:")
-            for th in thresholds:
-                print(f"  Threshold {th}: Accuracy: {avg_accuracy_per_noise_level[noise_factor][th]:.4f}")
-
-        # Plotting
-        save_directory = "threshold-mask-noise-oneSide_plot"
-        os.makedirs(save_directory, exist_ok=True)
-
-        for noise_factor, accuracies in avg_accuracy_per_noise_level.items():
-            plt.figure()
-            plt.plot(thresholds, accuracies, marker='o', linestyle='-', label=f'Noise {noise_factor}')
-            plt.title(f"Accuracy vs. Threshold for Noise {noise_factor}-oneSide")
-            plt.xlabel("Threshold")
-            plt.ylabel("Accuracy")
-            plt.legend(loc='best')
-            plt.grid(True)
-            plt.savefig(os.path.join(save_directory, f"accuracy_vs_threshold_noise_{noise_factor}.png"))
-            plt.close()
+    for noise_factor, accuracies in avg_accuracy_per_noise_level.items():
+        plt.figure()
+        plt.plot(thresholds, accuracies, marker='o', linestyle='-', label=f'Noise {noise_factor}')
+        plt.title(f"Accuracy vs. Threshold for Noise {noise_factor}-oneSide")
+        plt.xlabel("Threshold")
+        plt.ylabel("Accuracy")
+        plt.legend(loc='best')
+        plt.grid(True)
+        plt.savefig(os.path.join(save_directory, f"accuracy_vs_threshold_noise_{noise_factor}.png"))
+        plt.close()
 
 if __name__ == "__main__":
     main()

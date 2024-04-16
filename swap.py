@@ -180,86 +180,74 @@ if __name__ == "__main__":
 
 # TensorFlow compatible image loading and preprocessing
 
-def load_and_preprocess_image(image_path, mask_thickness, dataset_dir):
+def find_random_directory_with_images(base_dir, exclude_dir):
+    all_dirs = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d)) and d != exclude_dir]
+    random.shuffle(all_dirs)
+    for chosen_dir in all_dirs:
+        chosen_dir_path = os.path.join(base_dir, chosen_dir)
+        all_images = [f for f in os.listdir(chosen_dir_path) if f.endswith('.jpg')]
+        if all_images:
+            random_image = random.choice(all_images)
+            return os.path.join(chosen_dir_path, random_image)
+    return None
+
+def load_and_preprocess_image(image_path, dataset_dir):
+    current_dir = os.path.basename(os.path.dirname(image_path))
+    random_image_path = find_random_directory_with_images(dataset_dir, current_dir)
+    if random_image_path is None:
+        print("Failed to find a suitable random image.")
+        return None
+    
     try:
+        # Load and process the original image
         img = image.load_img(image_path, target_size=(112, 112))
         img_array = image.img_to_array(img)
+
+        # Load and process the random image
+        random_img = image.load_img(random_image_path, target_size=(112, 112))
+        random_img_array = image.img_to_array(random_img)
+
+        # Combine images
+        img_array[56:,:] = random_img_array[56:,:]  # Swap half the image
+        return preprocess_input(np.expand_dims(img_array, axis=0))
     except Exception as e:
-        print(f"Error loading image {image_path}: {e}")
+        print(f"Error processing images: {e}")
         return None
 
-    def find_directory_with_images(base_dir, current_dir):
-        all_person_dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d)) and d != os.path.basename(current_dir)]
-        random.shuffle(all_person_dirs)
-        for chosen_dir in all_person_dirs:
-            all_images = [f for f in os.listdir(chosen_dir) if os.path.isfile(os.path.join(chosen_dir, f))]
-            if all_images:
-                return chosen_dir, all_images
-        return None, None
-
-    current_person_dir = os.path.dirname(image_path)
-    different_person_dir, all_images = find_directory_with_images(dataset_dir, current_person_dir)
-
-    if not different_person_dir:
-        print(f"No valid images found in any directories under {dataset_dir}")
-        return None
-
-    swap_image_path = os.path.join(different_person_dir, random.choice(all_images))
-    swap_img = image.load_img(swap_image_path, target_size=(112, 112))
-    swap_img_array = image.img_to_array(swap_img)
-
-    num_rows_to_swap = int(112 * mask_thickness)
-    start_row = (112 - num_rows_to_swap) // 2
-    end_row = start_row + num_rows_to_swap
-    img_array[start_row:end_row, :, :] = swap_img_array[start_row:end_row, :, :]
-
-    img_array_expanded_dims = np.expand_dims(img_array, axis=0)
-    return preprocess_input(img_array_expanded_dims)
-
-def preprocess_dataset(pairs, mask_thickness, dataset_dir):
-    processed_imgs = []
-    for image_path1, image_path2 in pairs:
-        img1 = load_and_preprocess_image(image_path1, mask_thickness, dataset_dir)
-        img2 = load_and_preprocess_image(image_path2, mask_thickness, dataset_dir)
-        if img1 is not None and img2 is not None:
-            processed_imgs.extend([img1, img2])
-    return np.vstack(processed_imgs) if processed_imgs else None
-
-def read_pairs_file(pairs_file_path, dataset_dir):
-    pairs = []
-    with open(pairs_file_path, 'r') as f:
-        for line in f:
-            parts = line.strip().split()
-            if len(parts) < 2:
-                continue
-            pairs.append((os.path.join(dataset_dir, parts[0]), os.path.join(dataset_dir, parts[1])))
-    return pairs
-
-def evaluate_lfw(model, dataset_dir, pairs_files, mask_thickness):
-    labels = []
-    similarities = []
+def evaluate_lfw(model, dataset_dir, pairs_files):
+    labels, similarities = [], []
     for pairs_file in pairs_files:
-        pairs_path = os.path.join(dataset_dir, pairs_file)
-        pairs = read_pairs_file(pairs_path, dataset_dir)
-        dataset = preprocess_dataset(pairs, mask_thickness, dataset_dir)
-        if dataset is None:
-            print("Skipping evaluation due to empty dataset.")
-            continue
-        embeddings = model.predict(dataset)
-        for i in range(0, len(embeddings), 2):
-            sim = np.dot(embeddings[i], embeddings[i+1]) / (np.linalg.norm(embeddings[i]) * np.linalg.norm(embeddings[i+1]))
-            similarities.append(sim)
-            labels.append(1 if "same" in pairs_file else 0)
+        pairs_path = os.path.join(pairs_files_base, pairs_file)
+        with open(pairs_path, 'r') as file:
+            lines = file.read().splitlines()
+        
+        for i in range(0, len(lines), 2):
+            img1_path = os.path.join(dataset_dir, lines[i])
+            img2_path = os.path.join(dataset_dir, lines[i+1])
+            img1 = load_and_preprocess_image(img1_path, dataset_dir)
+            img2 = load_and_preprocess_image(img2_path, dataset_dir)
+
+            if img1 is None or img2 is None:
+                print("Skipping pair due to processing error.")
+                continue
+            
+            embedding1 = model.predict(img1)
+            embedding2 = model.predict(img2)
+            similarity = 1 - cosine(embedding1.flatten(), embedding2.flatten())
+            similarities.append(similarity)
+            labels.append(1 if "same" in pairs_file else 0)  # Assuming file naming convention to determine labels
+            
     return np.array(labels), np.array(similarities)
 
-def calculate_metrics(labels, similarities, threshold):
+def calculate_metrics(labels, similarities):
+    threshold = 0.5  # Example threshold
     predictions = similarities >= threshold
     tp = np.sum((predictions == 1) & (labels == 1))
     tn = np.sum((predictions == 0) & (labels == 0))
     fp = np.sum((predictions == 1) & (labels == 0))
     fn = np.sum((predictions == 0) & (labels == 1))
-
-    accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+    
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
@@ -298,9 +286,7 @@ def main():
         plt.ylabel(metric.capitalize())
         plt.legend(title='Mask Thickness', loc='best')
         plt.grid(True)
-        save_path = os.path.join('plot_outputs', f'{metric}_vs_threshold.png')
-        if not os.path.exists('plot_outputs'):
-            os.makedirs('plot_outputs')
+        save_path = os.path.join(save_directory, f'{metric}_vs_threshold.png')
         plt.savefig(save_path)
         print(f'Plot saved to {save_path}')
 if __name__ == "__main__":

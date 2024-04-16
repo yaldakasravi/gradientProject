@@ -16,17 +16,17 @@ model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_A
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
-
+"""
 import random
 
 def apply_random_mask(img_array, num_squares, square_size):
-    """
+    
     Applies a given number of square masks randomly on the image.
 
     :param img_array: NumPy array of the image.
     :param num_squares: The number of squares to apply.
     :param square_size: The size of each square.
-    """
+    
     h, w, _ = img_array.shape
     for _ in range(num_squares):
         x1 = random.randint(0, w - square_size)
@@ -97,7 +97,7 @@ def calculate_metrics(labels, similarities, threshold):
         'recall': recall,
         'f1': f1
     }
-"""
+
 def main():
     with tf.device('/GPU:1'):
         model = load_model(model_path)
@@ -171,7 +171,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-"""
+
 def main():
     with tf.device('/GPU:1'):
         model = load_model(model_path)
@@ -227,6 +227,90 @@ def main():
 
         # Note: Remember to end your experiment here if you're using a system like Comet ML for logging
         # experiment.end()
+
+if __name__ == "__main__":
+    main()
+"""    
+#using dataloader
+
+def apply_random_mask(img, num_squares, square_size):
+    h, w = img.shape[0], img.shape[1]
+    masks = np.zeros((num_squares, 4), dtype=int)
+    masks[:, 0] = np.random.randint(0, h - square_size, size=num_squares)  # y1
+    masks[:, 1] = masks[:, 0] + square_size  # y2
+    masks[:, 2] = np.random.randint(0, w - square_size, size=num_squares)  # x1
+    masks[:, 3] = masks[:, 2] + square_size  # x2
+    for y1, y2, x1, x2 in masks:
+        img[y1:y2, x1:x2, :] = 0
+    return img
+
+def preprocess_image(image_path, num_squares, square_size):
+    img = tf.io.read_file(image_path)
+    img = tf.image.decode_jpeg(img, channels=3)
+    img = tf.image.resize(img, [112, 112])
+    img = tf.cast(img, tf.float32) / 255.0
+    img = tf.numpy_function(apply_random_mask, [img, num_squares, square_size], tf.float32)
+    return preprocess_input(img)
+
+def prepare_dataset(pairs_file_path, num_squares, square_size):
+    def parse_line(line):
+        parts = tf.strings.split(line)
+        return os.path.join(dataset_dir, parts[0]), os.path.join(dataset_dir, parts[1]), tf.cast(parts[2], tf.int32)
+
+    dataset = tf.data.TextLineDataset(pairs_file_path)
+    dataset = dataset.map(parse_line)
+    dataset = dataset.map(lambda x, y, label: ((preprocess_image(x, num_squares, square_size), preprocess_image(y, 0, 0)), label))
+    return dataset.batch(32).prefetch(tf.data.experimental.AUTOTUNE)
+
+def compute_metrics(model, dataset):
+    embeddings1 = model.predict(dataset.map(lambda x, y: x))
+    embeddings2 = model.predict(dataset.map(lambda x, y: y))
+    labels = np.concatenate([y.numpy() for _, y in dataset])
+    similarities = 1 - cosine(embeddings1, embeddings2, axis=1)
+    predictions = similarities >= 0.5
+    accuracy = np.mean(predictions == labels)
+    return accuracy
+
+def main():
+    model = load_model(model_path)
+    num_squares_range = range(1, 11)  # Example: 1 to 10 squares
+    square_size = 20  # Example: each square is 20x20 pixels
+
+    # Prepare directory for saving plots
+    save_directory = "threshold-random-square-masking-oneSide_plot"
+    if not os.path.exists(save_directory):
+        os.makedirs(save_directory)
+
+    # Initialize a dictionary to store average accuracies for different numbers of squares
+    avg_accuracy_per_num_squares = {num_squares: [] for num_squares in num_squares_range}
+
+    # Iterate over each number of squares
+    for num_squares in num_squares_range:
+        accuracies = []  # Store accuracies for each file
+        for pairs_file in pairs_files:
+            dataset = prepare_dataset(pairs_file, num_squares, square_size)
+            accuracy = compute_metrics(model, dataset)
+            accuracies.append(accuracy)
+            print(f'Num Squares: {num_squares}, File: {pairs_file}, Accuracy: {accuracy:.4f}')
+
+        # Compute average accuracy for current number of squares and store it
+        avg_accuracy_per_num_squares[num_squares] = np.mean(accuracies)
+
+    # Plotting results
+    plt.figure()
+    for num_squares, accuracy in avg_accuracy_per_num_squares.items():
+        plt.plot(num_squares, accuracy, marker='o', linestyle='-', label=f'{num_squares} Squares')
+
+    plt.title("Accuracy vs. Number of Squares")
+    plt.xlabel("Number of Squares")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(os.path.join(save_directory, "accuracy_vs_number_of_squares.png"))
+    plt.close()
+
+    # End the Comet ML experiment
+    experiment.end()
 
 if __name__ == "__main__":
     main()

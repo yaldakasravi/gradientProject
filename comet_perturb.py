@@ -10,7 +10,9 @@ import tensorflow as tf
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from keras.preprocessing import image
+from sklearn.metrics import accuracy_score
 from keras.applications.mobilenet_v2 import preprocess_input
+
 #from PIL import Image
 # Assuming the Comet ML experiment is correctly initialized
 experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="inoise-threshold-analysis", workspace="enhancing-gradient")
@@ -21,6 +23,7 @@ dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
 
+"""
 def preprocess_image(image_path, noise_factor):
     img = tf.io.read_file(image_path)
     img = tf.image.decode_image(img, channels=3)
@@ -121,5 +124,103 @@ def main():
         plt.tight_layout()
         plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold_for_noise_levels_improved.png"))
         plt.close()
+if __name__ == "__main__":
+    main()
+"""
+
+#make it faster 
+
+def preprocess_image(file_path, noise_factor):
+    img = tf.io.read_file(file_path)
+    img = tf.image.decode_image(img, channels=3)
+    img = tf.image.resize(img, [112, 112])
+    img = tf.cast(img, tf.float32) / 255.0
+
+    # Apply noise
+    noise = tf.random.uniform(tf.shape(img), 0, 1)
+    img = (1 - noise_factor) * img + noise_factor * noise
+    return img
+
+def load_and_preprocess_image(path1, path2, noise_factor):
+    img1 = preprocess_image(path1, noise_factor)
+    img2 = preprocess_image(path2, noise_factor)
+    return (img1, img2)
+
+def parse_line(line, dataset_dir):
+    parts = tf.strings.split(line)
+    path1 = tf.strings.join([dataset_dir, parts[1]])
+    path2 = tf.strings.join([dataset_dir, parts[3]])
+    label = tf.strings.to_number(parts[4], tf.int32)
+    return path1, path2, label
+
+def prepare_dataset(pairs_file, dataset_dir, noise_factor, batch_size):
+    lines = tf.data.TextLineDataset(pairs_file).skip(1)  # Skip the header line
+    dataset = lines.map(lambda line: parse_line(line, dataset_dir))
+    dataset = dataset.map(lambda path1, path2, label: ((load_and_preprocess_image(path1, path2, noise_factor)), label))
+    dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    return dataset
+
+def calculate_cosine_similarity(features):
+    f1, f2 = features[:, 0], features[:, 1]
+    norm_f1 = tf.nn.l2_normalize(f1, axis=1)
+    norm_f2 = tf.nn.l2_normalize(f2, axis=1)
+    cos_sim = tf.reduce_sum(tf.multiply(norm_f1, norm_f2), axis=1)
+    return cos_sim
+
+def evaluate_model(model, dataset):
+    labels = []
+    predictions = []
+
+    for (img1, img2), label in dataset:
+        # Get embeddings
+        embeddings = model(tf.concat([img1, img2], axis=0))
+        f1, f2 = embeddings[:len(embeddings)//2], embeddings[len(embeddings)//2:]
+
+        # Calculate cosine similarity
+        cos_sim = calculate_cosine_similarity(tf.stack([f1, f2], axis=1))
+
+        # Define your threshold for deciding if images match
+        threshold = 0.5
+        pred = tf.cast(cos_sim > threshold, tf.int32)
+
+        labels.extend(label.numpy())
+        predictions.extend(pred.numpy())
+
+    return accuracy_score(labels, predictions)
+
+def main():
+    model = load_model(model_path)
+    noise_levels = np.linspace(0, 1.0, 11)
+    accuracies = {noise: [] for noise in noise_levels}
+
+    # Evaluate each pairs file at each noise level
+    for pairs_file in pairs_files:
+        for noise_level in noise_levels:
+            dataset = prepare_dataset(pairs_file, dataset_dir, noise_level, batch_size=32)
+            accuracy = evaluate_model(model, dataset)
+            accuracies[noise_level].append(accuracy)
+
+    # Plotting results
+    plt.figure(figsize=(10, 8))
+    for noise_level, accs in accuracies.items():
+        plt.plot(accs, label=f'Noise {noise_level:.2f}', marker='o')
+
+    plt.title("Accuracy by Noise Level Across Different Pairs Files")
+    plt.xlabel("Pairs File Index")
+    plt.ylabel("Accuracy")
+    plt.xticks(range(len(pairs_files)), [f'{i+1}' for i in range(len(pairs_files))])
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Plotting
+    save_directory = "noise_level_experiment_plots_twoSide"
+    os.makedirs(save_directory, exist_ok=True)
+        
+   # Save the plot
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold_for_noise_levels_improved.png"))
+    plt.close()
+
 if __name__ == "__main__":
     main()
