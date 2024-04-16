@@ -1,23 +1,20 @@
-import numpy as np
-import os
 from comet_ml import Experiment
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from tensorflow.keras.models import load_model
+import os
+import numpy as np
 import matplotlib.pyplot as plt
-from scipy.spatial.distance import cosine
-import tensorflow as tf
-from tensorflow.data import Dataset
-
+from tensorflow.keras.models import load_model
+from PIL import Image
 # Initialize your Comet ML experiment here
-experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking_effect", workspace="enhancing-gradient")
+experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking_effect-noise-oneside", workspace="enhancing-gradient")
 
 # Define paths
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
+pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
 
+# Load the model
+model = load_model(model_path)
 #very slow 
 """
 #make it noisy 
@@ -160,84 +157,101 @@ if __name__ == "__main__":
 """
 
 #faster with dataloader 
+def preprocess_image(image_path):
+    image = Image.open(image_path).resize((112, 112))
+    image = np.array(image, dtype='float32')
+    image /= 255.0  # Normalize
+    return image
 
-def preprocess_image(file_path, noise_factor):
-    img = tf.io.read_file(file_path)
-    img = tf.image.decode_jpeg(img, channels=3)
-    img = tf.image.resize(img, [112, 112])
-    img = tf.cast(img, tf.float32) / 255.0
+def add_noise_to_eyes(image, level):
+    eye_width = 20  # Width of the eye region
+    eye_height = 10  # Height of the eye region
+    left_eye_center = (34, 56)  # (x, y) positions
+    right_eye_center = (78, 56)
 
-    # Add Gaussian noise
-    noise = tf.random.normal(shape=tf.shape(img), mean=0.0, stddev=noise_factor, dtype=tf.float32)
-    img += noise
-    img = tf.clip_by_value(img, 0.0, 1.0)
+    # Generate noise
+    noise_intensity = level * 255  # Scale by 255 as pixel values range from 0 to 255
+    # Ensure noise is generated for each color channel
+    noise = np.random.normal(loc=0.0, scale=noise_intensity, size=(eye_height, eye_width, 3))
 
-    return preprocess_input(img)
+    # Apply noise to the eye regions
+    for center in [left_eye_center, right_eye_center]:
+        x_start = center[0] - eye_width // 2
+        y_start = center[1] - eye_height // 2
+        image[y_start:y_start + eye_height, x_start:x_start + eye_width] += noise
+        # Ensure pixel values remain within [0, 255]
+        np.clip(image, 0, 255, out=image)
 
-def load_and_process_images(file_path1, file_path2, label, noise_factor):
-    img1 = preprocess_image(file_path1, noise_factor)
-    img2 = preprocess_image(file_path2, noise_factor)
-    return (img1, img2), label
+    return image
 
-def create_pairs_dataset(pairs_file_path, dataset_dir, noise_factor):
-    def parse_function(line):
-        parts = tf.strings.split(line)
-        file1_path = tf.strings.join([dataset_dir, parts[0]], separator='/')
-        file2_path = tf.strings.join([dataset_dir, parts[1]], separator='/')
-        label = tf.strings.to_number(parts[2], out_type=tf.int32)
-        return file1_path, file2_path, label
-
-    dataset = tf.data.TextLineDataset(pairs_file_path)
-    dataset = dataset.map(parse_function, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    dataset = dataset.map(lambda x, y, z: load_and_process_images(x, y, z, noise_factor), num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    return dataset
-
-def get_embeddings(model, images):
-    return model.predict(images, batch_size=32)  # Process images in batches
-
-def compute_similarity(embeddings1, embeddings2):
-    dot_product = tf.reduce_sum(embeddings1 * embeddings2, axis=1)
-    norm_product = tf.norm(embeddings1, axis=1) * tf.norm(embeddings2, axis=1)
-    similarity = 1 - dot_product / norm_product
+def calculate_similarity(image1, image2):
+    emb1 = model.predict(np.expand_dims(image1, axis=0))
+    emb2 = model.predict(np.expand_dims(image2, axis=0))
+    similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
     return similarity
 
+def read_pairs(pairs_file):
+    pairs = []
+    with open(pairs_file, "r") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            if i + 1 < len(lines):
+                file1 = os.path.join(dataset_dir, lines[i].strip())
+                file2 = os.path.join(dataset_dir, lines[i + 1].strip())
+                if os.path.isfile(file1) and os.path.isfile(file2):
+                    pairs.append((file1, file2, True))
+    return pairs
+
 def main():
-    model = load_model(model_path)
-    thresholds = np.linspace(0.3, 1, num=14)
-    noise_levels = np.linspace(0.0, 1.0, num=11)
-
-    for noise_factor in noise_levels:
+    noise_levels = np.linspace(0.0, 1.0, num=11)  # Noise intensity levels
+    results = {level: [] for level in noise_levels}
+    for level in noise_levels:
+        accuracies = []
         for pairs_file in pairs_files:
-            pairs_dataset = create_pairs_dataset(pairs_file, dataset_dir, noise_factor)
-            pairs_dataset = pairs_dataset.batch(32).prefetch(tf.data.experimental.AUTOTUNE)
-
-            for (img1, img2), labels in pairs_dataset:
-                embeddings1 = get_embeddings(model, img1)
-                embeddings2 = get_embeddings(model, img2)
-                similarities = compute_similarity(embeddings1, embeddings2)
-
-                accuracies = []
-                for threshold in thresholds:
-                    predictions = similarities >= threshold
-                    accuracy = tf.reduce_mean(tf.cast(predictions == labels, tf.float32))
-                    accuracies.append(accuracy.numpy())
-
-                print(f"Noise {noise_factor}, File {pairs_file}: Mean Accuracy {np.mean(accuracies):.4f}")
+            pairs = read_pairs(pairs_file)
+            if not pairs:
+                continue
+            tp = fp = tn = fn = 0
+            for file1, file2, is_same in pairs:
+                image1 = preprocess_image(file1)
+                image2 = preprocess_image(file2)
+                image1 = add_noise_to_eyes(image1, level)  # Add noise only to the first image
+                
+                similarity = calculate_similarity(image1, image2)
+                is_positive_match = similarity > 0.5  # Assume threshold for simplicity
+                if is_positive_match and is_same:
+                    tp += 1
+                elif is_positive_match and not is_same:
+                    fp += 1
+                elif not is_positive_match and not is_same:
+                    tn += 1
+                elif not is_positive_match and is_same:
+                    fn += 1
+            total_comparisons = tp + fp + tn + fn
+            if total_comparisons == 0:
+                accuracy = 0
+            else:
+                accuracy = (tp + tn) / total_comparisons
+            accuracies.append(accuracy)
+        results[level] = np.mean(accuracies)  # Store average accuracy for this noise level
 
     # Plotting
-    save_directory = "threshold-mask-noise-oneSide_plot"
+    save_directory = "noise-masking-eyes-oenside_plot"
     os.makedirs(save_directory, exist_ok=True)
 
-    for noise_factor, accuracies in avg_accuracy_per_noise_level.items():
-        plt.figure()
-        plt.plot(thresholds, accuracies, marker='o', linestyle='-', label=f'Noise {noise_factor}')
-        plt.title(f"Accuracy vs. Threshold for Noise {noise_factor}-oneSide")
-        plt.xlabel("Threshold")
-        plt.ylabel("Accuracy")
-        plt.legend(loc='best')
-        plt.grid(True)
-        plt.savefig(os.path.join(save_directory, f"accuracy_vs_threshold_noise_{noise_factor}.png"))
-        plt.close()
+    plt.figure(figsize=(10, 8))
+    levels = list(results.keys())
+    accuracies = [results[level] for level in levels]
+    plt.plot(levels, accuracies, 'o-', label='Accuracy')
+    plt.xlabel('Noise Level')
+    plt.ylabel('Accuracy')
+    plt.title('Effect of Noise Addition to One Eye Region on Face Recognition Accuracy')
+    plt.legend()
+    plt.grid(True)
+    save_path = os.path.join(save_directory, 'accuracy_vs_noise_level.png')
+    plt.savefig(save_path)
+    print(f'Plot saved to {save_path}')
 
 if __name__ == "__main__":
     main()
+

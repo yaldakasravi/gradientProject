@@ -1,14 +1,11 @@
-import numpy as np
-import os
-import random
 from comet_ml import Experiment
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from tensorflow.keras.models import load_model
+import os
+import numpy as np
 import matplotlib.pyplot as plt
-from scipy.spatial.distance import cosine
-import tensorflow as tf
-
+from tensorflow.keras.models import load_model
+from PIL import Image
+import random
+import glob
 # Initialize your Comet ML experiment here
 experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="swap-differentPerson_effect", workspace="enhancing-gradient")
 #experiment = Experiment(api_key="YourCometMLAPIKey", project_name="swap-samePerson_effect", workspace="enhancing-gradient")
@@ -18,6 +15,13 @@ model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_A
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
+
+thresholds = np.linspace(0.3, 1, num=14)
+mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
+
+# Load the model
+model = load_model(model_path)
+
 
 #ver slow 
 #different person 
@@ -180,114 +184,110 @@ if __name__ == "__main__":
 
 # TensorFlow compatible image loading and preprocessing
 
-def find_random_directory_with_images(base_dir, exclude_dir):
-    all_dirs = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d)) and d != exclude_dir]
-    random.shuffle(all_dirs)
-    for chosen_dir in all_dirs:
-        chosen_dir_path = os.path.join(base_dir, chosen_dir)
-        all_images = [f for f in os.listdir(chosen_dir_path) if f.endswith('.jpg')]
-        if all_images:
-            random_image = random.choice(all_images)
-            return os.path.join(chosen_dir_path, random_image)
-    return None
+def preprocess_image(image_path):
+    image = Image.open(image_path).resize((112, 112))
+    image = np.array(image, dtype='float32')
+    image /= 255.0  # Normalization
+    return image
 
-def load_and_preprocess_image(image_path, dataset_dir):
-    current_dir = os.path.basename(os.path.dirname(image_path))
-    random_image_path = find_random_directory_with_images(dataset_dir, current_dir)
-    if random_image_path is None:
-        print("Failed to find a suitable random image.")
-        return None
-    
-    try:
-        # Load and process the original image
-        img = image.load_img(image_path, target_size=(112, 112))
-        img_array = image.img_to_array(img)
+def swap_area(image1, image2, mask_thickness):
+    h, w, _ = image1.shape
+    mask_height = int(h * mask_thickness)
+    mask_width = int(w * mask_thickness)
+    x = random.randint(0, w - mask_width)
+    y = random.randint(0, h - mask_height)
+    image1_copy = image1.copy()
+    image1_copy[y:y+mask_height, x:x+mask_width] = image2[y:y+mask_height, x:x+mask_width]
+    return image1_copy
 
-        # Load and process the random image
-        random_img = image.load_img(random_image_path, target_size=(112, 112))
-        random_img_array = image.img_to_array(random_img)
+def calculate_similarity(image1, image2):
+    emb1 = model.predict(np.expand_dims(image1, axis=0))
+    emb2 = model.predict(np.expand_dims(image2, axis=0))
+    similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+    return similarity
 
-        # Combine images
-        img_array[56:,:] = random_img_array[56:,:]  # Swap half the image
-        return preprocess_input(np.expand_dims(img_array, axis=0))
-    except Exception as e:
-        print(f"Error processing images: {e}")
-        return None
-
-def evaluate_lfw(model, dataset_dir, pairs_files):
-    labels, similarities = [], []
-    for pairs_file in pairs_files:
-        pairs_path = os.path.join(pairs_files_base, pairs_file)
-        with open(pairs_path, 'r') as file:
-            lines = file.read().splitlines()
-        
+def read_pairs(pairs_file):
+    pairs = []
+    with open(pairs_file, "r") as file:
+        lines = file.readlines()
         for i in range(0, len(lines), 2):
-            img1_path = os.path.join(dataset_dir, lines[i])
-            img2_path = os.path.join(dataset_dir, lines[i+1])
-            img1 = load_and_preprocess_image(img1_path, dataset_dir)
-            img2 = load_and_preprocess_image(img2_path, dataset_dir)
-
-            if img1 is None or img2 is None:
-                print("Skipping pair due to processing error.")
-                continue
-            
-            embedding1 = model.predict(img1)
-            embedding2 = model.predict(img2)
-            similarity = 1 - cosine(embedding1.flatten(), embedding2.flatten())
-            similarities.append(similarity)
-            labels.append(1 if "same" in pairs_file else 0)  # Assuming file naming convention to determine labels
-            
-    return np.array(labels), np.array(similarities)
-
-def calculate_metrics(labels, similarities):
-    threshold = 0.5  # Example threshold
-    predictions = similarities >= threshold
-    tp = np.sum((predictions == 1) & (labels == 1))
-    tn = np.sum((predictions == 0) & (labels == 0))
-    fp = np.sum((predictions == 1) & (labels == 0))
-    fn = np.sum((predictions == 0) & (labels == 1))
-    
-    accuracy = (tp + tn) / (tp + tn + fp + fn)
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
-
-    return {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1': f1}
+            if i + 1 < len(lines):
+                person1_image1 = lines[i].strip()
+                person1_image2 = lines[i + 1].strip()
+                if person1_image1 and person1_image2:
+                    pairs.append((person1_image1, person1_image2, True))
+                if i + 3 < len(lines):
+                    person2_image1 = lines[i + 2].strip()
+                    person2_image2 = lines[i + 3].strip()
+                    if person2_image1 and person2_image2:
+                        pairs.append((person2_image1, person2_image2, False))
+    return pairs
 
 def main():
-    model = load_model(model_path)
-    thresholds = np.linspace(0.3, 1, num=14)
-    mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
-
-    all_metrics = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
-    metrics_per_thickness = {thickness: {metric: [] for metric in all_metrics} for thickness in mask_thickness_levels}
-
-    # Evaluate each mask thickness
+    results = {thickness: {threshold: [] for threshold in thresholds} for thickness in mask_thickness_levels}
     for mask_thickness in mask_thickness_levels:
-        labels, similarities = evaluate_lfw(model, dataset_dir, pairs_files, mask_thickness)
-        # Collect metrics for each threshold
         for threshold in thresholds:
-            metrics = calculate_metrics(labels, similarities, threshold)
-            for metric in all_metrics:
-                metrics_per_thickness[mask_thickness][metric].append(metrics[metric])
+            tp = fp = tn = fn = 0
+            for pairs_file in pairs_files:
+                pairs_path = os.path.join(pairs_files_base, pairs_file)
+                pairs = read_pairs(pairs_path)
+                if not pairs:
+                    continue
+
+                for pair in pairs:
+                    file1, file2, is_same = pair
+                    image1_path = os.path.join(dataset_dir, file1)
+                    image2_path = os.path.join(dataset_dir, file2)
+
+                    if not os.path.isfile(image1_path) or not os.path.isfile(image2_path):
+                        continue
+
+                    image1 = preprocess_image(image1_path)
+                    image2 = preprocess_image(image2_path)
+
+                    # Get a random image from a different person
+                    random_image_path = random.choice(glob.glob(os.path.join(dataset_dir, '**', '*.jpg'), recursive=True))
+                    random_image = preprocess_image(random_image_path)
+
+                    # Swap area
+                    image1 = swap_area(image1, random_image, mask_thickness)
+
+                    similarity = calculate_similarity(image1, image2)
+                    is_positive_match = similarity > threshold
+                    if is_positive_match and is_same:
+                        tp += 1
+                    elif is_positive_match and not is_same:
+                        fp += 1
+                    elif not is_positive_match and not is_same:
+                        tn += 1
+                    elif not is_positive_match and is_same:
+                        fn += 1
+
+            total_comparisons = tp + fp + tn + fn
+            if total_comparisons == 0:
+                accuracy = 0
+            else:
+                accuracy = (tp + tn) / total_comparisons
+            results[mask_thickness][threshold].append(accuracy)
 
     # Plotting
     save_directory = "threshold-swap-differentPerson_plot"
     os.makedirs(save_directory, exist_ok=True)
 
     plt.figure(figsize=(14, 10))
-    for metric in all_metrics:
-        plt.clf()  # Clear the current figure
-        for mask_thickness, metrics in metrics_per_thickness.items():
-            plt.plot(thresholds, metrics[metric], marker='o', linestyle='-', label=f'Mask Thickness {mask_thickness:.2f}')
-        
-        plt.title(f'{metric.capitalize()} vs. Threshold for Various Mask Thicknesses')
+    for mask_thickness, metrics_per_threshold in results.items():
+        plt.clf()
+        for threshold, accuracies in metrics_per_threshold.items():
+            plt.plot(thresholds, accuracies, marker='o', linestyle='-', label=f'Threshold {threshold:.2f}')
+
+        plt.title(f'Accuracy vs. Threshold for Mask Thickness {mask_thickness:.2f}')
         plt.xlabel('Threshold')
-        plt.ylabel(metric.capitalize())
+        plt.ylabel('Accuracy')
         plt.legend(title='Mask Thickness', loc='best')
         plt.grid(True)
-        save_path = os.path.join(save_directory, f'{metric}_vs_threshold.png')
+        save_path = os.path.join(save_directory, f'accuracy_vs_threshold_{mask_thickness:.2f}.png')
         plt.savefig(save_path)
         print(f'Plot saved to {save_path}')
+
 if __name__ == "__main__":
     main()

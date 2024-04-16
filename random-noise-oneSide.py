@@ -1,21 +1,23 @@
-import numpy as np
-import os
 from comet_ml import Experiment
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from tensorflow.keras.models import load_model
-import matplotlib.pyplot as plt
-from scipy.spatial.distance import cosine
-import tensorflow as tf
 
 # Initialize your Comet ML experiment here
 experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="random-square-masking_effect", workspace="enhancing-gradient")
 
-# Define paths
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import load_model
+from PIL import Image
+import random
+
+# Parameters
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
+pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
+noise_levels = np.linspace(0.0, 1.0, num=11)  # Intensity levels of noise
+# Load the model
+model = load_model(model_path)
+
 """
 import random
 
@@ -233,84 +235,89 @@ if __name__ == "__main__":
 """    
 #using dataloader
 
-def apply_random_mask(img, num_squares, square_size):
-    h, w = img.shape[0], img.shape[1]
-    masks = np.zeros((num_squares, 4), dtype=int)
-    masks[:, 0] = np.random.randint(0, h - square_size, size=num_squares)  # y1
-    masks[:, 1] = masks[:, 0] + square_size  # y2
-    masks[:, 2] = np.random.randint(0, w - square_size, size=num_squares)  # x1
-    masks[:, 3] = masks[:, 2] + square_size  # x2
-    for y1, y2, x1, x2 in masks:
-        img[y1:y2, x1:x2, :] = 0
-    return img
+def preprocess_image(image_path):
+    image = Image.open(image_path).resize((112, 112))
+    image = np.array(image, dtype='float32')
+    image /= 255.0  # Normalize
+    return image
 
-def preprocess_image(image_path, num_squares, square_size):
-    img = tf.io.read_file(image_path)
-    img = tf.image.decode_jpeg(img, channels=3)
-    img = tf.image.resize(img, [112, 112])
-    img = tf.cast(img, tf.float32) / 255.0
-    img = tf.numpy_function(apply_random_mask, [img, num_squares, square_size], tf.float32)
-    return preprocess_input(img)
+def add_noise_to_image(image, noise_level):
+    # Adding Gaussian noise
+    mean = 0
+    var = noise_level
+    sigma = var ** 0.5
+    gaussian = np.random.normal(mean, sigma, (112, 112, 3))  # Assuming RGB image
+    noisy_image = np.clip(image + gaussian, 0, 1)  # Clipping to maintain valid pixel range
+    return noisy_image
 
-def prepare_dataset(pairs_file_path, num_squares, square_size):
-    def parse_line(line):
-        parts = tf.strings.split(line)
-        return os.path.join(dataset_dir, parts[0]), os.path.join(dataset_dir, parts[1]), tf.cast(parts[2], tf.int32)
+def calculate_similarity(image1, image2):
+    emb1 = model.predict(np.expand_dims(image1, axis=0))
+    emb2 = model.predict(np.expand_dims(image2, axis=0))
+    similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+    return similarity
 
-    dataset = tf.data.TextLineDataset(pairs_file_path)
-    dataset = dataset.map(parse_line)
-    dataset = dataset.map(lambda x, y, label: ((preprocess_image(x, num_squares, square_size), preprocess_image(y, 0, 0)), label))
-    return dataset.batch(32).prefetch(tf.data.experimental.AUTOTUNE)
-
-def compute_metrics(model, dataset):
-    embeddings1 = model.predict(dataset.map(lambda x, y: x))
-    embeddings2 = model.predict(dataset.map(lambda x, y: y))
-    labels = np.concatenate([y.numpy() for _, y in dataset])
-    similarities = 1 - cosine(embeddings1, embeddings2, axis=1)
-    predictions = similarities >= 0.5
-    accuracy = np.mean(predictions == labels)
-    return accuracy
+def read_pairs(pairs_file):
+    pairs = []
+    with open(pairs_file, "r") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            if i + 1 < len(lines):
+                person1_image1 = lines[i].strip()
+                person1_image2 = lines[i + 1].strip()
+                if person1_image1 and person1_image2:
+                    pairs.append((person1_image1, person1_image2, True))
+    return pairs
 
 def main():
-    model = load_model(model_path)
-    num_squares_range = range(1, 11)  # Example: 1 to 10 squares
-    square_size = 20  # Example: each square is 20x20 pixels
-
-    # Prepare directory for saving plots
-    save_directory = "threshold-random-square-masking-oneSide_plot"
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
-
-    # Initialize a dictionary to store average accuracies for different numbers of squares
-    avg_accuracy_per_num_squares = {num_squares: [] for num_squares in num_squares_range}
-
-    # Iterate over each number of squares
-    for num_squares in num_squares_range:
-        accuracies = []  # Store accuracies for each file
+    results = {level: [] for level in noise_levels}
+    for level in noise_levels:
+        accuracies = []
         for pairs_file in pairs_files:
-            dataset = prepare_dataset(pairs_file, num_squares, square_size)
-            accuracy = compute_metrics(model, dataset)
+            pairs = read_pairs(pairs_file)
+            if not pairs:
+                print(f"No valid pairs found in {pairs_file}.")
+                continue
+            tp = fp = tn = fn = 0
+            for file1, file2, is_same in pairs:
+                image1 = preprocess_image(os.path.join(dataset_dir, file1))
+                image2 = preprocess_image(os.path.join(dataset_dir, file2))
+
+                # Add noise to the first image only
+                image1 = add_noise_to_image(image1, level)
+
+                similarity = calculate_similarity(image1, image2)
+                is_positive_match = similarity > 0.5  # Arbitrary threshold for simplicity
+                if is_positive_match and is_same:
+                    tp += 1
+                elif is_positive_match and not is_same:
+                    fp += 1
+                elif not is_positive_match and not is_same:
+                    tn += 1
+                elif not is_positive_match and is_same:
+                    fn += 1
+
+            total_comparisons = tp + fp + tn + fn
+            if total_comparisons == 0:
+                accuracy = 0  # Append 0 to avoid division by zero
+            else:
+                accuracy = (tp + tn) / total_comparisons
             accuracies.append(accuracy)
-            print(f'Num Squares: {num_squares}, File: {pairs_file}, Accuracy: {accuracy:.4f}')
+        results[level] = np.mean(accuracies)
 
-        # Compute average accuracy for current number of squares and store it
-        avg_accuracy_per_num_squares[num_squares] = np.mean(accuracies)
-
-    # Plotting results
-    plt.figure()
-    for num_squares, accuracy in avg_accuracy_per_num_squares.items():
-        plt.plot(num_squares, accuracy, marker='o', linestyle='-', label=f'{num_squares} Squares')
-
-    plt.title("Accuracy vs. Number of Squares")
-    plt.xlabel("Number of Squares")
-    plt.ylabel("Accuracy")
+    # Plotting
+    save_directory = "noise-intensity-oneSide_plot"
+    os.makedirs(save_directory, exist_ok=True)
+    plt.figure(figsize=(10, 8))
+    for level, accuracy in results.items():
+        plt.plot(noise_levels, [results[lv] for lv in noise_levels], 'o-', label=f'Noise Level {level:.2f}')
+    plt.xlabel('Noise Level')
+    plt.ylabel('Accuracy')
+    plt.title('Effect of Noise Addition on Face Authentication Accuracy')
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(save_directory, "accuracy_vs_number_of_squares.png"))
+    plt.savefig(os.path.join(save_directory, 'accuracy_vs_noise_level.png'))
+    plt.show()
     plt.close()
-
-    # End the Comet ML experiment
-    experiment.end()
 
 if __name__ == "__main__":
     main()

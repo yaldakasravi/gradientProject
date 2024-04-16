@@ -1,21 +1,24 @@
-import numpy as np
-import os
-import matplotlib.pyplot as plt
-import tensorflow as tf
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from tensorflow.keras.models import load_model
-from scipy.spatial import distance
 from comet_ml import Experiment
 
 # Initialize your Comet ML experiment here
 experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking_effect", workspace="enhancing-gradient")
 
-# Define paths
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import load_model
+from PIL import Image
+
+# Parameters
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
+pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
+thresholds = np.linspace(0.3, 1, num=14)
+eye_mask_levels = np.linspace(0, 1, num=10)
+
+# Load the model
+model = load_model(model_path)
+
 
 #very slow 
 """
@@ -147,95 +150,98 @@ if __name__ == "__main__":
     main()
 """
 #using dataloader 
-def preprocess_image(image_path, mask_thickness):
-    img = tf.io.read_file(image_path)
-    img = tf.image.decode_jpeg(img, channels=3)
-    img = tf.image.resize(img, [112, 112])
-    img = tf.cast(img, tf.float32) / 255.0
 
-    # Calculate the number of rows to mask based on the mask thickness
-    num_rows_to_mask = tf.cast(112 * mask_thickness, tf.int32)
-    start_row = (112 - num_rows_to_mask) // 2
-    end_row = start_row + num_rows_to_mask
+def preprocess_image(image_path):
+    if not os.path.isfile(image_path):
+        raise FileNotFoundError(f"Expected file but got directory or non-existent path: {image_path}")
+    image = Image.open(image_path).resize((112, 112))
+    image = np.array(image, dtype='float32')
+    image /= 255.0  # Normalize
+    return image
 
-    # Create a mask and apply it
-    mask = tf.concat([
-        tf.ones((start_row, 112, 3)),
-        tf.zeros((num_rows_to_mask, 112, 3)),
-        tf.ones((112 - end_row, 112, 3))
-    ], axis=0)
-    img *= mask
-    return preprocess_input(img)
+def mask_eyes(image, level):
+    eye_width = 20  # Width of the eye region
+    eye_height = 10  # Height of the eye region
+    left_eye_center = (34, 56)  # (x, y) positions
+    right_eye_center = (78, 56)
+    mask_width = int(eye_width * level / 2)
+    image[left_eye_center[1]-eye_height//2:left_eye_center[1]+eye_height//2,
+          left_eye_center[0]-mask_width:left_eye_center[0]+mask_width] = 0
+    image[right_eye_center[1]-eye_height//2:right_eye_center[1]+eye_height//2,
+          right_eye_center[0]-mask_width:right_eye_center[0]+mask_width] = 0
+    return image
 
-def compute_cosine_similarity(embeddings1, embeddings2):
-    dot_product = tf.reduce_sum(embeddings1 * embeddings2, axis=1)
-    norm_product = tf.norm(embeddings1, axis=1) * tf.norm(embeddings2, axis=1)
-    return 1 - dot_product / norm_product
+def calculate_similarity(image1, image2):
+    emb1 = model.predict(np.expand_dims(image1, axis=0))
+    emb2 = model.predict(np.expand_dims(image2, axis=0))
+    similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+    return similarity
 
-def prepare_dataset(pairs_file_path, mask_thickness):
-    def parse_line(line):
-        parts = tf.strings.split(line)
-        img1_path = tf.strings.join([dataset_dir, parts[0]])
-        img2_path = tf.strings.join([dataset_dir, parts[1]])
-        label = tf.strings.to_number(parts[2], tf.int32)
-        return img1_path, img2_path, label
-
-    dataset = tf.data.TextLineDataset(pairs_file_path)
-    dataset = dataset.map(parse_line, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    dataset = dataset.map(lambda x, y, label: (
-        (preprocess_image(x, mask_thickness), preprocess_image(y, 0)), label),
-        num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    return dataset.batch(32).prefetch(tf.data.experimental.AUTOTUNE)
-
-def evaluate_model(model, dataset):
-    embeddings1 = []
-    embeddings2 = []
-    labels = []
-
-    for (img1, img2), label in dataset:
-        embeddings1.append(model.predict(img1))
-        embeddings2.append(model.predict(img2))
-        labels.append(label)
-
-    embeddings1 = tf.concat(embeddings1, axis=0)
-    embeddings2 = tf.concat(embeddings2, axis=0)
-    labels = tf.concat(labels, axis=0)
-
-    similarities = compute_cosine_similarity(embeddings1, embeddings2)
-    return labels, similarities
+def read_pairs(pairs_file):
+    pairs = []
+    with open(pairs_file, "r") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            if i + 1 < len(lines):
+                file1 = os.path.join(dataset_dir, lines[i].strip())
+                file2 = os.path.join(dataset_dir, lines[i + 1].strip())
+                if os.path.isfile(file1) and os.path.isfile(file2):
+                    pairs.append((file1, file2, True))
+    return pairs
 
 def main():
-    model = load_model(model_path)
-    thresholds = np.linspace(0.3, 1, num=14)
-    mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
-
-    save_directory = "masking_plot"
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
-
-    plt.figure()
-    for mask_thickness in mask_thickness_levels:
-        accuracies = []
+    results = {level: {threshold: [] for threshold in thresholds} for level in eye_mask_levels}
+    for level in eye_mask_levels:
         for threshold in thresholds:
-            all_accuracies = []
+            accuracies = []
             for pairs_file in pairs_files:
-                dataset = prepare_dataset(pairs_file, mask_thickness)
-                labels, similarities = evaluate_model(model, dataset)
-                predictions = similarities >= threshold
-                accuracy = tf.reduce_mean(tf.cast(predictions == labels, tf.float32)).numpy()
-                all_accuracies.append(accuracy)
-            accuracies.append(np.mean(all_accuracies))
-        plt.plot(thresholds, accuracies, marker='o', linestyle='-', label=f'Thickness {mask_thickness:.1f}')
+                pairs = read_pairs(pairs_file)
+                if not pairs:
+                    continue
+                tp = fp = tn = fn = 0
+                for file1, file2, is_same in pairs:
+                    image1 = preprocess_image(file1)
+                    image2 = preprocess_image(file2)
+                    # Apply masking to both images
+                    image1 = mask_eyes(image1, level)
+                    image2 = mask_eyes(image2, level)
+                    similarity = calculate_similarity(image1, image2)
+                    is_positive_match = similarity > threshold
+                    if is_positive_match and is_same:
+                        tp += 1
+                    elif is_positive_match and not is_same:
+                        fp += 1
+                    elif not is_positive_match and not is_same:
+                        tn += 1
+                    elif not is_positive_match and is_same:
+                        fn += 1
+                total_comparisons = tp + fp + tn + fn
+                if total_comparisons == 0:
+                    accuracy = 0
+                else:
+                    accuracy = (tp + tn) / total_comparisons
+                accuracies.append(accuracy)
+            results[level][threshold] = np.mean(accuracies)
 
-    plt.title("Accuracy vs. Threshold for Different Mask Thicknesses")
-    plt.xlabel("Threshold")
-    plt.ylabel("Accuracy")
-    plt.legend()
+    # Plotting
+    save_directory = "threshold-mask-both-sides_plot"
+    os.makedirs(save_directory, exist_ok=True)
+
+    plt.figure(figsize=(10, 8))
+    for level, accuracies_by_threshold in results.items():
+        thresholds_list = list(accuracies_by_threshold.keys())
+        accuracies_list = [accuracies_by_threshold[th] for th in thresholds_list]
+        plt.plot(thresholds_list, accuracies_list, label=f'Mask Level {level:.2f}')
+
+    plt.xlabel('Threshold')
+    plt.ylabel('Accuracy')
+    plt.title('Effect of Eye Masking at Different Levels on Both Images')
+    plt.legend(title='Mask Level')
     plt.grid(True)
-    plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold.png"))
+    save_path = os.path.join(save_directory, 'accuracy_vs_thresholds_by_mask_level.png')
+    plt.savefig(save_path)
+    plt.show()
     plt.close()
-
-    experiment.end()
 
 if __name__ == "__main__":
     main()
