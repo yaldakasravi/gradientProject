@@ -1,29 +1,27 @@
 from comet_ml import Experiment
+
+# Initialize your Comet ML experiment here
+experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking_effect", workspace="enhancing-gradient")
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 from PIL import Image
 import random
-import glob
-# Initialize your Comet ML experiment here
-experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="swap-differentPerson_effect", workspace="enhancing-gradient")
-#experiment = Experiment(api_key="YourCometMLAPIKey", project_name="swap-samePerson_effect", workspace="enhancing-gradient")
+from utils import read_pairs
 
-# Define paths
+# Parameters
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
-
-thresholds = np.linspace(0.3, 1, num=14)
-mask_thickness_levels = np.linspace(0.1, 1.0, num=10)
+#pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
+pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 2)]
+thresholds = np.linspace(0.0, 1, num=20)
+mask_thickness_levels = np.linspace(0, 1, num=10)
 
 # Load the model
 model = load_model(model_path)
 
-
-#ver slow 
 #different person 
 """
 def load_and_preprocess_image(image_path, mask_thickness, dataset_dir):
@@ -185,20 +183,37 @@ if __name__ == "__main__":
 # TensorFlow compatible image loading and preprocessing
 
 def preprocess_image(image_path):
+    if not os.path.isfile(image_path):
+        raise FileNotFoundError(f"Expected file but got directory or non-existent path: {image_path}")
     image = Image.open(image_path).resize((112, 112))
     image = np.array(image, dtype='float32')
-    image /= 255.0  # Normalization
+    image /= 255.0  # Normalize
     return image
 
-def swap_area(image1, image2, mask_thickness):
-    h, w, _ = image1.shape
-    mask_height = int(h * mask_thickness)
-    mask_width = int(w * mask_thickness)
-    x = random.randint(0, w - mask_width)
-    y = random.randint(0, h - mask_height)
-    image1_copy = image1.copy()
-    image1_copy[y:y+mask_height, x:x+mask_width] = image2[y:y+mask_height, x:x+mask_width]
-    return image1_copy
+def get_random_image_path(exclude_paths):
+    all_images = []
+    # Assuming dataset_dir is a directory containing subdirectories for each person
+    for person_dir in os.listdir(dataset_dir):
+        person_path = os.path.join(dataset_dir, person_dir)
+        if os.path.isdir(person_path):
+            all_images.extend([
+                os.path.join(person_path, image)
+                for image in os.listdir(person_path)
+                if os.path.join(person_path, image) not in exclude_paths
+            ])
+    return random.choice(all_images) if all_images else None
+
+def swap_eyes_area(image1, image2, eye_position, eye_size):
+    x, y = eye_position
+    eye_width, eye_height = eye_size
+
+    # Assume eye regions are horizontal and have the same size
+    swap_region1 = image1[y:y+eye_height, x:x+eye_width, :]
+    swap_region2 = image2[y:y+eye_height, x:x+eye_width, :]
+    image1[y:y+eye_height, x:x+eye_width, :] = swap_region2
+    image2[y:y+eye_height, x:x+eye_width, :] = swap_region1
+    
+    return image1, image2
 
 def calculate_similarity(image1, image2):
     emb1 = model.predict(np.expand_dims(image1, axis=0))
@@ -206,51 +221,32 @@ def calculate_similarity(image1, image2):
     similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
     return similarity
 
-def read_pairs(pairs_file):
-    pairs = []
-    with open(pairs_file, "r") as file:
-        lines = file.readlines()
-        for i in range(0, len(lines), 2):
-            if i + 1 < len(lines):
-                person1_image1 = lines[i].strip()
-                person1_image2 = lines[i + 1].strip()
-                if person1_image1 and person1_image2:
-                    pairs.append((person1_image1, person1_image2, True))
-                if i + 3 < len(lines):
-                    person2_image1 = lines[i + 2].strip()
-                    person2_image2 = lines[i + 3].strip()
-                    if person2_image1 and person2_image2:
-                        pairs.append((person2_image1, person2_image2, False))
-    return pairs
 
 def main():
-    results = {thickness: {threshold: [] for threshold in thresholds} for thickness in mask_thickness_levels}
-    for mask_thickness in mask_thickness_levels:
+    # Define eye position and size
+    eye_position = (34, 56)  # Rough position for the eye region
+    eye_size = (20, 10)  # Size of the eye region (width, height)
+
+    results = {level: {threshold: [] for threshold in thresholds} for level in mask_thickness_levels}
+    for level in mask_thickness_levels:
         for threshold in thresholds:
-            tp = fp = tn = fn = 0
+            accuracies = []
             for pairs_file in pairs_files:
-                pairs_path = os.path.join(pairs_files_base, pairs_file)
-                pairs = read_pairs(pairs_path)
+                pairs = read_pairs(pairs_file)
                 if not pairs:
                     continue
+                tp = fp = tn = fn = 0
+                for file1, file2, is_same in pairs:
+                    image1 = preprocess_image(file1)
+                    image2 = preprocess_image(file2)
+                    # Select a random image to swap eyes from
+                    random_image_path = get_random_image_path([file1, file2])
+                    if random_image_path:
+                        random_image = preprocess_image(random_image_path)
 
-                for pair in pairs:
-                    file1, file2, is_same = pair
-                    image1_path = os.path.join(dataset_dir, file1)
-                    image2_path = os.path.join(dataset_dir, file2)
-
-                    if not os.path.isfile(image1_path) or not os.path.isfile(image2_path):
-                        continue
-
-                    image1 = preprocess_image(image1_path)
-                    image2 = preprocess_image(image2_path)
-
-                    # Get a random image from a different person
-                    random_image_path = random.choice(glob.glob(os.path.join(dataset_dir, '**', '*.jpg'), recursive=True))
-                    random_image = preprocess_image(random_image_path)
-
-                    # Swap area
-                    image1 = swap_area(image1, random_image, mask_thickness)
+                        # Swap eye regions between image1, image2, and a random image
+                        image1, _ = swap_eyes_area(image1, random_image, eye_position, eye_size)
+                        image2, _ = swap_eyes_area(image2, random_image, eye_position, eye_size)
 
                     similarity = calculate_similarity(image1, image2)
                     is_positive_match = similarity > threshold
@@ -262,32 +258,33 @@ def main():
                         tn += 1
                     elif not is_positive_match and is_same:
                         fn += 1
-
-            total_comparisons = tp + fp + tn + fn
-            if total_comparisons == 0:
-                accuracy = 0
-            else:
-                accuracy = (tp + tn) / total_comparisons
-            results[mask_thickness][threshold].append(accuracy)
+                total_comparisons = tp + fp + tn + fn
+                if total_comparisons == 0:
+                    accuracy = 0
+                else:
+                    accuracy = (tp + tn) / total_comparisons
+                accuracies.append(accuracy)
+            results[level][threshold] = np.mean(accuracies)
 
     # Plotting
-    save_directory = "threshold-swap-differentPerson_plot"
+    save_directory = "one-swap-different-person-both-sides_plot"
     os.makedirs(save_directory, exist_ok=True)
 
-    plt.figure(figsize=(14, 10))
-    for mask_thickness, metrics_per_threshold in results.items():
-        plt.clf()
-        for threshold, accuracies in metrics_per_threshold.items():
-            plt.plot(thresholds, accuracies, marker='o', linestyle='-', label=f'Threshold {threshold:.2f}')
+    plt.figure(figsize=(10, 8))
+    for level, accuracies_by_threshold in results.items():
+        thresholds_list = list(accuracies_by_threshold.keys())
+        accuracies_list = [accuracies_by_threshold[th] for th in thresholds_list]
+        plt.plot(thresholds_list, accuracies_list, label=f'Mask Level {level:.2f}')
 
-        plt.title(f'Accuracy vs. Threshold for Mask Thickness {mask_thickness:.2f}')
-        plt.xlabel('Threshold')
-        plt.ylabel('Accuracy')
-        plt.legend(title='Mask Thickness', loc='best')
-        plt.grid(True)
-        save_path = os.path.join(save_directory, f'accuracy_vs_threshold_{mask_thickness:.2f}.png')
-        plt.savefig(save_path)
-        print(f'Plot saved to {save_path}')
+    plt.xlabel('Threshold')
+    plt.ylabel('Accuracy')
+    plt.title('full Effect of swapping eyes with different person on Both Images')
+    plt.legend(title='Mask Level')
+    plt.grid(True)
+    save_path = os.path.join(save_directory, 'accuracy_vs_thresholds_by_mask_level.png')
+    plt.savefig(save_path)
+    plt.show()
+    plt.close()
 
 if __name__ == "__main__":
     main()

@@ -4,14 +4,16 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 from PIL import Image
 import random
+from utils import read_pairs
 
 # Parameters
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]
-pairs_files = [os.path.join('/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled', f'pairs_{i:02}.txt') for i in range(1, 11)]
-thresholds = np.linspace(0.3, 1, num=14)
+#pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]
+#pairs_files = [os.path.join('/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled', f'pairs_{i:02}.txt') for i in range(1, 11)]
+pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 2)]
+thresholds = np.linspace(0.0, 1, num=20)
 num_squares_range = range(1, 11)
 square_size = 20
 
@@ -38,38 +40,10 @@ def calculate_similarity(image1, image2):
     emb2 = model.predict(np.expand_dims(image2, axis=0))
     similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
     return similarity
-"""
-def read_pairs(pairs_file):
-    pairs = []
-    with open(pairs_file, "r") as file:
-        lines = file.readlines()
-        for i in range(0, len(lines), 2):
-            if i + 1 < len(lines):
-                person1_image1 = lines[i].strip()
-                person1_image2 = lines[i + 1].strip()
-                if person1_image1 and person1_image2:  # Check that neither path is empty
-                    pairs.append((person1_image1, person1_image2, True))  
-                # Assuming every four lines we switch to a new set of comparisons
-                if i + 3 < len(lines):
-                    person2_image1 = lines[i + 2].strip()
-                    person2_image2 = lines[i + 3].strip()
-                    if person2_image1 and person2_image2:  # Check that neither path is empty
-                        pairs.append((person2_image1, person2_image2, False))
-    return pairs
-"""
-def read_pairs(pairs_file):
-    pairs = []
-    with open(pairs_file, "r") as file:
-        lines = file.readlines()
-        for i in range(0, len(lines), 2):
-            if i + 1 < len(lines):
-                file1 = os.path.join(dataset_dir, lines[i].strip())
-                file2 = os.path.join(dataset_dir, lines[i + 1].strip())
-                if os.path.isfile(file1) and os.path.isfile(file2):
-                    pairs.append((file1, file2, True))
-    return pairs
+
 def main():
-    # Adjust results structure to separate each square number under each threshold
+
+# Adjust results structure to separate each square number under each threshold
     results = {num_squares: {threshold: [] for threshold in thresholds} for num_squares in num_squares_range}
     for num_squares in num_squares_range:
         for threshold in thresholds:
@@ -103,7 +77,7 @@ def main():
             results[num_squares][threshold] = np.mean(accuracies)
 
     # Plotting
-    save_directory = "threshold-mask-black-oneside_plot"
+    save_directory = "one-threshold-mask-black-oneside_plot"
     os.makedirs(save_directory, exist_ok=True)
     plt.figure(figsize=(10, 8))
     colors = plt.cm.viridis(np.linspace(0, 1, len(num_squares_range)))
@@ -114,7 +88,7 @@ def main():
 
     plt.xlabel('Threshold')
     plt.ylabel('Accuracy')
-    plt.title('Effect of Image Masking on Face Authentication Accuracy Across Different Thresholds')
+    plt.title('full Effect of random Masking on user image Accuracy Across Different Thresholds')
     plt.legend()
     plt.grid(True)
     save_path = os.path.join(save_directory, 'accuracy_vs_thresholds_by_num_squares.png')

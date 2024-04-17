@@ -1,20 +1,20 @@
-from comet_ml import Experiment
-
-# Initialize your Comet ML experiment here
-experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking_effect", workspace="enhancing-gradient")
-
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 from PIL import Image
+import random
+from utils import read_pairs
+# Initialize your Comet ML experiment here
+#experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking-bothside_effect", workspace="enhancing-gradient")
 
 # Parameters
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
-thresholds = np.linspace(0.3, 1, num=14)
-eye_mask_levels = np.linspace(0, 1, num=10)
+#pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
+pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 2)]
+thresholds = np.linspace(0.0, 1, num=20)
+eye_mask_levels = np.linspace(0, 1, num=10)  # Intensity levels of eye mask
 
 # Load the model
 model = load_model(model_path)
@@ -177,17 +177,6 @@ def calculate_similarity(image1, image2):
     similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
     return similarity
 
-def read_pairs(pairs_file):
-    pairs = []
-    with open(pairs_file, "r") as file:
-        lines = file.readlines()
-        for i in range(0, len(lines), 2):
-            if i + 1 < len(lines):
-                file1 = os.path.join(dataset_dir, lines[i].strip())
-                file2 = os.path.join(dataset_dir, lines[i + 1].strip())
-                if os.path.isfile(file1) and os.path.isfile(file2):
-                    pairs.append((file1, file2, True))
-    return pairs
 
 def main():
     results = {level: {threshold: [] for threshold in thresholds} for level in eye_mask_levels}
@@ -224,7 +213,7 @@ def main():
             results[level][threshold] = np.mean(accuracies)
 
     # Plotting
-    save_directory = "threshold-mask-both-sides_plot"
+    save_directory = "one-threshold-mask-both-sides_plot"
     os.makedirs(save_directory, exist_ok=True)
 
     plt.figure(figsize=(10, 8))
