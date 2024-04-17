@@ -203,55 +203,56 @@ def read_pairs(pairs_file):
     return pairs
 
 def main():
+    thresholds = np.linspace(0.3, 1, num=14)  # Threshold levels
     noise_levels = np.linspace(0.0, 1.0, num=11)  # Noise intensity levels
-    results = {level: [] for level in noise_levels}
-    for level in noise_levels:
-        accuracies = []
-        for pairs_file in pairs_files:
-            pairs = read_pairs(pairs_file)
-            if not pairs:
-                continue
-            tp = fp = tn = fn = 0
-            for file1, file2, is_same in pairs:
-                image1 = preprocess_image(file1)
-                image2 = preprocess_image(file2)
-                image1 = add_noise_to_eyes(image1, level)  # Add noise only to the first image
-                
-                similarity = calculate_similarity(image1, image2)
-                is_positive_match = similarity > 0.5  # Assume threshold for simplicity
-                if is_positive_match and is_same:
-                    tp += 1
-                elif is_positive_match and not is_same:
-                    fp += 1
-                elif not is_positive_match and not is_same:
-                    tn += 1
-                elif not is_positive_match and is_same:
-                    fn += 1
+    results = {threshold: {noise_level: None for noise_level in noise_levels} for threshold in thresholds}
+    
+    for noise_level in noise_levels:
+        for threshold in thresholds:
+            tp = fp = tn = fn = 0  # Initialize counters for each threshold-noise level combination
+            for pairs_file in pairs_files:
+                pairs = read_pairs(pairs_file)
+                if not pairs:
+                    continue
+
+                for file1, file2, is_same in pairs:
+                    image1 = preprocess_image(file1)
+                    image2 = preprocess_image(file2)
+                    image1 = add_noise_to_eyes(image1, noise_level)
+                    #image2 = add_noise_to_eyes(image2, noise_level)
+                    
+                    similarity = calculate_similarity(image1, image2)
+                    is_positive_match = similarity > threshold
+                    if is_positive_match and is_same:
+                        tp += 1
+                    elif is_positive_match and not is_same:
+                        fp += 1
+                    elif not is_positive_match and not is_same:
+                        tn += 1
+                    elif not is_positive_match and is_same:
+                        fn += 1
+                    
             total_comparisons = tp + fp + tn + fn
-            if total_comparisons == 0:
-                accuracy = 0
-            else:
-                accuracy = (tp + tn) / total_comparisons
-            accuracies.append(accuracy)
-        results[level] = np.mean(accuracies)  # Store average accuracy for this noise level
-
+            accuracy = (tp + tn) / total_comparisons if total_comparisons else 0
+            results[threshold][noise_level] = accuracy
+    
     # Plotting
-    save_directory = "noise-masking-eyes-oenside_plot"
+    save_directory = "noise-masking-oneside_plot"
     os.makedirs(save_directory, exist_ok=True)
-
     plt.figure(figsize=(10, 8))
-    levels = list(results.keys())
-    accuracies = [results[level] for level in levels]
-    plt.plot(levels, accuracies, 'o-', label='Accuracy')
-    plt.xlabel('Noise Level')
+    for noise_level in noise_levels:
+        accuracies = [results[threshold][noise_level] for threshold in thresholds]
+        plt.plot(thresholds, accuracies, label=f'Noise Level {noise_level:.2f}')
+    
+    plt.xlabel('Threshold')
     plt.ylabel('Accuracy')
-    plt.title('Effect of Noise Addition to One Eye Region on Face Recognition Accuracy')
+    plt.title('Effect of Noise Addition to Eye Regions on Face Recognition Accuracy Across Thresholds')
     plt.legend()
     plt.grid(True)
-    save_path = os.path.join(save_directory, 'accuracy_vs_noise_level.png')
+    save_path = os.path.join(save_directory, 'accuracy_vs_threshold_by_noise_level.png')
     plt.savefig(save_path)
-    print(f'Plot saved to {save_path}')
+    plt.show()
+    plt.close()
 
 if __name__ == "__main__":
     main()
-

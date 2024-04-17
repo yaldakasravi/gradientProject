@@ -1,33 +1,38 @@
-import numpy as np
-import os
 from comet_ml import Experiment
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from tensorflow.keras.models import load_model
-import matplotlib.pyplot as plt
-from scipy.spatial.distance import cosine
-import tensorflow as tf
 
 # Initialize your Comet ML experiment here
-experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="random-square-masking_effect", workspace="enhancing-gradient")
+experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="random-square-masking-both side_effect", workspace="enhancing-gradient")
 
-# Define paths
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import load_model
+from PIL import Image
+import random
+
+# Parameters
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
 pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]  # Adjust the range as needed
+pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]
+pairs_files = [os.path.join('/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled', f'pairs_{i:02}.txt') for i in range(1, 11)]
+thresholds = np.linspace(0.3, 1, num=14)
+num_squares_range = range(1, 11)
+square_size = 20
 
+# Load the model
+model = load_model(model_path)
 """
 import random
 
 def apply_random_mask(img_array, num_squares, square_size):
-    """
+    
     Applies a given number of square masks randomly on the image.
 
     :param img_array: NumPy array of the image.
     :param num_squares: The number of squares to apply.
     :param square_size: The size of each square.
-    """
+    
     h, w, _ = img_array.shape
     for _ in range(num_squares):
         x1 = random.randint(0, w - square_size)
@@ -238,84 +243,107 @@ if __name__ == "__main__":
     main()
 """
 #using dataloader to be faster 
-def apply_random_mask(img, num_squares, square_size):
+
+def preprocess_image(image_path):
+    #print("Attempting to open image at:", image_path)
+    image = Image.open(image_path).resize((112, 112))
+    image = np.array(image, dtype='float32')
+    image /= 255.0  # Normalization
+    return image
+
+def add_noise_to_masked_area(image, num_squares, square_size, noise_level):
     for _ in range(num_squares):
-        x1 = tf.random.uniform((), 0, img.shape[1] - square_size, dtype=tf.int32)
-        y1 = tf.random.uniform((), 0, img.shape[0] - square_size, dtype=tf.int32)
-        mask = tf.pad(tensor=tf.ones((square_size, square_size, 3), dtype=tf.float32),
-                      paddings=[[y1, img.shape[0] - y1 - square_size],
-                                [x1, img.shape[1] - x1 - square_size], [0, 0]],
-                      mode="CONSTANT", constant_values=0)
-        img *= mask
-    return img
+        # Generate a random position for the square
+        x = random.randint(0, image.shape[1] - square_size)
+        y = random.randint(0, image.shape[0] - square_size)
 
-def preprocess_image(image_path, num_squares, square_size):
-    img = tf.io.read_file(image_path)
-    img = tf.image.decode_jpeg(img, channels=3)
-    img = tf.image.resize(img, [112, 112])
-    img = tf.cast(img, tf.float32) / 255.0
-    img = apply_random_mask(img, num_squares, square_size)
-    return preprocess_input(img)
+        # Generate noise for the square area
+        mean = 0
+        var = noise_level
+        sigma = var ** 0.5
+        gaussian = np.random.normal(mean, sigma, (square_size, square_size, 3))
 
-def prepare_dataset(pairs_file_path, num_squares, square_size):
-    def parse_line(line):
-        parts = tf.strings.split(line)
-        return os.path.join(dataset_dir, parts[0]), os.path.join(dataset_dir, parts[1]), tf.strings.to_number(parts[2], out_type=tf.int32)
+        # Apply the noise to the square area on the image
+        image[y:y+square_size, x:x+square_size, :] += gaussian
+        # Ensure pixel values remain within [0, 255] after adding noise
+        np.clip(image, 0, 255, out=image)
+    return image
 
-    dataset = tf.data.TextLineDataset(pairs_file_path)
-    dataset = dataset.map(parse_line)
-    dataset = dataset.map(lambda x, y, label: ((preprocess_image(x, num_squares, square_size), preprocess_image(y, 0, 0)), label))
-    return dataset.batch(32).prefetch(tf.data.experimental.AUTOTUNE)
+def calculate_similarity(image1, image2):
+    # Assuming the model outputs embeddings and cosine similarity is used
+    emb1 = model.predict(np.expand_dims(image1, axis=0))
+    emb2 = model.predict(np.expand_dims(image2, axis=0))
+    similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+    return similarity
 
-def get_embeddings(model, dataset):
-    features = []
-    labels = []
-    for (img1, img2), label in dataset:
-        embedding1 = model(img1, training=False)
-        embedding2 = model(img2, training=False)
-        features.append((embedding1, embedding2))
-        labels.append(label)
-    return features, labels
-
-def compute_accuracy(features, labels, threshold):
-    accuracies = []
-    for (emb1, emb2), label in zip(features, labels):
-        sim = 1 - cosine(emb1.numpy().flatten(), emb2.numpy().flatten())
-        pred = sim >= threshold
-        accuracies.append(np.mean(pred == label.numpy()))
-    return np.mean(accuracies)
-
+def read_pairs(pairs_file):
+    pairs = []
+    with open(pairs_file, "r") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            if i + 1 < len(lines):
+                file1 = os.path.join(dataset_dir, lines[i].strip())
+                file2 = os.path.join(dataset_dir, lines[i + 1].strip())
+                if os.path.isfile(file1) and os.path.isfile(file2):
+                    pairs.append((file1, file2, True))
+    return pairs
 def main():
-    model = load_model(model_path)
-    thresholds = np.linspace(0.3, 1, num=14)
-    num_squares_range = range(1, 11)
-    square_size = 20
-
-    save_directory = "threshold-random-square-masking_plot"
-    os.makedirs(save_directory, exist_ok=True)
-
-    plt.figure()
+    noise_level = 0.3
+    # Adjust results structure to separate each square number under each threshold
+    results = {num_squares: {threshold: [] for threshold in thresholds} for num_squares in num_squares_range}
     for num_squares in num_squares_range:
-        avg_accuracies = []
         for threshold in thresholds:
-            all_accuracies = []
+            accuracies = []
             for pairs_file in pairs_files:
-                dataset = prepare_dataset(pairs_file, num_squares, square_size)
-                features, labels = get_embeddings(model, dataset)
-                accuracy = compute_accuracy(features, labels, threshold)
-                all_accuracies.append(accuracy)
-            avg_accuracies.append(np.mean(all_accuracies))
-        plt.plot(thresholds, avg_accuracies, marker='o', linestyle='-', label=f'{num_squares} Squares')
+                pairs = read_pairs(pairs_file)
+                if not pairs:
+                    continue
+                tp = fp = tn = fn = 0
+                for file1, file2, is_same in pairs:
+                    image1 = preprocess_image(os.path.join(dataset_dir, file1))
+                    image2 = preprocess_image(os.path.join(dataset_dir, file2))
 
-    plt.title("Accuracy vs. Threshold for Different Numbers of Squares")
-    plt.xlabel("Threshold")
-    plt.ylabel("Accuracy")
+                    # Here we add noise to the masked areas of the image
+                    image1 = add_noise_to_masked_area(np.copy(image1), num_squares, square_size, noise_level)
+                    image2 = add_noise_to_masked_area(np.copy(image2), num_squares, square_size, noise_level)
+                    similarity = calculate_similarity(image1, image2)
+                    is_positive_match = similarity > threshold
+                    if is_positive_match and is_same:
+                        tp += 1
+                    elif is_positive_match and not is_same:
+                        fp += 1
+                    elif not is_positive_match and not is_same:
+                        tn += 1
+                    elif not is_positive_match and is_same:
+                        fn += 1
+
+                total_comparisons = tp + fp + tn + fn
+                if total_comparisons == 0:
+                    accuracies.append(0)  # Append 0 to avoid division by zero
+                else:
+                    accuracies.append((tp + tn) / total_comparisons)
+            results[num_squares][threshold] = np.mean(accuracies)
+
+    # Plotting
+    save_directory = "threshold-random-noise-bothside_plot"
+    os.makedirs(save_directory, exist_ok=True)
+    plt.figure(figsize=(10, 8))
+    colors = plt.cm.viridis(np.linspace(0, 1, len(num_squares_range)))
+    for idx, num_squares in enumerate(num_squares_range):
+        thresholds_list = list(thresholds)
+        accuracies_list = [results[num_squares][threshold] for threshold in thresholds]
+        plt.plot(thresholds_list, accuracies_list, 'o-', label=f'Num Squares {num_squares}', color=colors[idx])
+
+    plt.xlabel('Threshold')
+    plt.ylabel('Accuracy')
+    plt.title('Effect of Image Masking on Face Authentication Accuracy Across Different Thresholds')
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(save_directory, "accuracy_vs_threshold_for_number_of_squares.png"))
+    save_path = os.path.join(save_directory, 'accuracy_vs_thresholds_by_num_squares.png')
+    plt.savefig(save_path)
+    plt.show()
     plt.close()
-
-    experiment.end()
 
 if __name__ == "__main__":
     main()
+

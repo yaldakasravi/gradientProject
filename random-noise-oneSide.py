@@ -13,8 +13,13 @@ import random
 # Parameters
 model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
 dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
-pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
-noise_levels = np.linspace(0.0, 1.0, num=11)  # Intensity levels of noise
+pairs_files_base = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
+pairs_files = [f'pairs_{i:02}.txt' for i in range(1, 11)]
+pairs_files = [os.path.join('/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled', f'pairs_{i:02}.txt') for i in range(1, 11)]
+thresholds = np.linspace(0.3, 1, num=14)
+num_squares_range = range(1, 11)
+square_size = 20
+
 # Load the model
 model = load_model(model_path)
 
@@ -236,26 +241,37 @@ if __name__ == "__main__":
 #using dataloader
 
 def preprocess_image(image_path):
+    #print("Attempting to open image at:", image_path)
     image = Image.open(image_path).resize((112, 112))
     image = np.array(image, dtype='float32')
-    image /= 255.0  # Normalize
+    image /= 255.0  # Normalization
     return image
 
-def add_noise_to_image(image, noise_level):
-    # Adding Gaussian noise
-    mean = 0
-    var = noise_level
-    sigma = var ** 0.5
-    gaussian = np.random.normal(mean, sigma, (112, 112, 3))  # Assuming RGB image
-    noisy_image = np.clip(image + gaussian, 0, 1)  # Clipping to maintain valid pixel range
-    return noisy_image
+def add_noise_to_masked_area(image, num_squares, square_size, noise_level):
+    for _ in range(num_squares):
+        # Generate a random position for the square
+        x = random.randint(0, image.shape[1] - square_size)
+        y = random.randint(0, image.shape[0] - square_size)
+
+        # Generate noise for the square area
+        mean = 0
+        var = noise_level
+        sigma = var ** 0.5
+        gaussian = np.random.normal(mean, sigma, (square_size, square_size, 3))
+
+        # Apply the noise to the square area on the image
+        image[y:y+square_size, x:x+square_size, :] += gaussian
+        # Ensure pixel values remain within [0, 255] after adding noise
+        np.clip(image, 0, 255, out=image)
+    return image
 
 def calculate_similarity(image1, image2):
+    # Assuming the model outputs embeddings and cosine similarity is used
     emb1 = model.predict(np.expand_dims(image1, axis=0))
     emb2 = model.predict(np.expand_dims(image2, axis=0))
     similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
     return similarity
-
+"""
 def read_pairs(pairs_file):
     pairs = []
     with open(pairs_file, "r") as file:
@@ -264,58 +280,81 @@ def read_pairs(pairs_file):
             if i + 1 < len(lines):
                 person1_image1 = lines[i].strip()
                 person1_image2 = lines[i + 1].strip()
-                if person1_image1 and person1_image2:
-                    pairs.append((person1_image1, person1_image2, True))
+                if person1_image1 and person1_image2:  # Check that neither path is empty
+                    pairs.append((person1_image1, person1_image2, True))  
+                # Assuming every four lines we switch to a new set of comparisons
+                if i + 3 < len(lines):
+                    person2_image1 = lines[i + 2].strip()
+                    person2_image2 = lines[i + 3].strip()
+                    if person2_image1 and person2_image2:  # Check that neither path is empty
+                        pairs.append((person2_image1, person2_image2, False))
     return pairs
-
+"""
+def read_pairs(pairs_file):
+    pairs = []
+    with open(pairs_file, "r") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            if i + 1 < len(lines):
+                file1 = os.path.join(dataset_dir, lines[i].strip())
+                file2 = os.path.join(dataset_dir, lines[i + 1].strip())
+                if os.path.isfile(file1) and os.path.isfile(file2):
+                    pairs.append((file1, file2, True))
+    return pairs
 def main():
-    results = {level: [] for level in noise_levels}
-    for level in noise_levels:
-        accuracies = []
-        for pairs_file in pairs_files:
-            pairs = read_pairs(pairs_file)
-            if not pairs:
-                print(f"No valid pairs found in {pairs_file}.")
-                continue
-            tp = fp = tn = fn = 0
-            for file1, file2, is_same in pairs:
-                image1 = preprocess_image(os.path.join(dataset_dir, file1))
-                image2 = preprocess_image(os.path.join(dataset_dir, file2))
+    noise_level = 0.3 
+    # Adjust results structure to separate each square number under each threshold
+    results = {num_squares: {threshold: [] for threshold in thresholds} for num_squares in num_squares_range}
+    for num_squares in num_squares_range:
+        for threshold in thresholds:
+            accuracies = []
+            for pairs_file in pairs_files:
+                pairs = read_pairs(pairs_file)
+                if not pairs:
+                    continue
+                tp = fp = tn = fn = 0
+                for file1, file2, is_same in pairs:
+                    image1 = preprocess_image(os.path.join(dataset_dir, file1))
+                    image2 = preprocess_image(os.path.join(dataset_dir, file2))
+                    
+                    # Here we add noise to the masked areas of the image
+                    image1 = add_noise_to_masked_area(np.copy(image1), num_squares, square_size, noise_level)
+                    #image2 = add_noise_to_masked_area(np.copy(image2), num_squares, square_size, noise_level)
+                    similarity = calculate_similarity(image1, image2)
+                    is_positive_match = similarity > threshold
+                    if is_positive_match and is_same:
+                        tp += 1
+                    elif is_positive_match and not is_same:
+                        fp += 1
+                    elif not is_positive_match and not is_same:
+                        tn += 1
+                    elif not is_positive_match and is_same:
+                        fn += 1
 
-                # Add noise to the first image only
-                image1 = add_noise_to_image(image1, level)
-
-                similarity = calculate_similarity(image1, image2)
-                is_positive_match = similarity > 0.5  # Arbitrary threshold for simplicity
-                if is_positive_match and is_same:
-                    tp += 1
-                elif is_positive_match and not is_same:
-                    fp += 1
-                elif not is_positive_match and not is_same:
-                    tn += 1
-                elif not is_positive_match and is_same:
-                    fn += 1
-
-            total_comparisons = tp + fp + tn + fn
-            if total_comparisons == 0:
-                accuracy = 0  # Append 0 to avoid division by zero
-            else:
-                accuracy = (tp + tn) / total_comparisons
-            accuracies.append(accuracy)
-        results[level] = np.mean(accuracies)
+                total_comparisons = tp + fp + tn + fn
+                if total_comparisons == 0:
+                    accuracies.append(0)  # Append 0 to avoid division by zero
+                else:
+                    accuracies.append((tp + tn) / total_comparisons)
+            results[num_squares][threshold] = np.mean(accuracies)
 
     # Plotting
-    save_directory = "noise-intensity-oneSide_plot"
+    save_directory = "threshold-random-noise-oneside_plot"
     os.makedirs(save_directory, exist_ok=True)
     plt.figure(figsize=(10, 8))
-    for level, accuracy in results.items():
-        plt.plot(noise_levels, [results[lv] for lv in noise_levels], 'o-', label=f'Noise Level {level:.2f}')
-    plt.xlabel('Noise Level')
+    colors = plt.cm.viridis(np.linspace(0, 1, len(num_squares_range)))
+    for idx, num_squares in enumerate(num_squares_range):
+        thresholds_list = list(thresholds)
+        accuracies_list = [results[num_squares][threshold] for threshold in thresholds]
+        plt.plot(thresholds_list, accuracies_list, 'o-', label=f'Num Squares {num_squares}', color=colors[idx])
+
+    plt.xlabel('Threshold')
     plt.ylabel('Accuracy')
-    plt.title('Effect of Noise Addition on Face Authentication Accuracy')
+    plt.title('Effect of Image Masking on Face Authentication Accuracy Across Different Thresholds')
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(save_directory, 'accuracy_vs_noise_level.png'))
+    save_path = os.path.join(save_directory, 'accuracy_vs_thresholds_by_num_squares.png')
+    plt.savefig(save_path)
     plt.show()
     plt.close()
 

@@ -202,7 +202,7 @@ def main():
                     image2 = preprocess_image(file2)
                     # Apply masking to both images
                     image1 = mask_eyes(image1, level)
-                    1
+                    
                     similarity = calculate_similarity(image1, image2)
                     is_positive_match = similarity > threshold
                     if is_positive_match and is_same:
