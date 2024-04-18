@@ -1,0 +1,117 @@
+from utils import read_pairs
+from comet_ml import Experiment
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import load_model
+from PIL import Image
+import random
+
+# Initialize your Comet ML experiment
+experiment = Experiment(api_key="UuHTEgYku8q9Ww3n13pSEgC8d", project_name="masking_effect", workspace="enhancing-gradient")
+
+# Parameters
+model_path = '/home/yaldaw/working_dir/yalda/ghostfacenet-ex/models/GN_W0.5_S2_ArcFace_epoch16.h5'
+dataset_dir = '/home/yaldaw/scratch/yaldaw/dataset/lfw_funneled'
+#pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 11)]
+pairs_files = [os.path.join(dataset_dir, f'pairs_{i:02}.txt') for i in range(1, 2)]
+thresholds = np.linspace(0.0, 1, num=20)
+num_squares_range = range(1, 11)
+square_size = 20
+
+# Load the model
+model = load_model(model_path)
+
+def preprocess_image(image_path):
+    if not os.path.isfile(image_path):
+        raise FileNotFoundError(f"Expected file but got directory or non-existent path: {image_path}")
+    image = Image.open(image_path).resize((112, 112))
+    image = np.array(image, dtype='float32')
+    image /= 255.0  # Normalize
+    return image
+
+def get_different_person_image(current_image_path, dataset_dir):
+    current_person = os.path.basename(os.path.dirname(current_image_path))
+    all_people = [person for person in os.listdir(dataset_dir) if person != current_person and os.path.isdir(os.path.join(dataset_dir, person))]
+    if not all_people:
+        return None
+    different_person = random.choice(all_people)
+    different_person_dir = os.path.join(dataset_dir, different_person)
+    different_person_images = os.listdir(different_person_dir)
+    if not different_person_images:
+        return None
+    return os.path.join(different_person_dir, random.choice(different_person_images))
+
+def swap_random_squares(image1, image2, num_squares, square_size):
+    h, w, _ = image1.shape
+    for _ in range(num_squares):
+        x = random.randint(0, w - square_size)
+        y = random.randint(0, h - square_size)
+        image1[y:y+square_size, x:x+square_size] = image2[y:y+square_size, x:x+square_size]
+    return image1
+
+def calculate_similarity(image1, image2):
+    emb1 = model.predict(np.expand_dims(image1, axis=0))
+    emb2 = model.predict(np.expand_dims(image2, axis=0))
+    similarity = np.dot(emb1, emb2.T) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
+    return similarity
+
+
+def main():
+    results = {num_squares: {threshold: [] for threshold in thresholds} for num_squares in num_squares_range}
+    for num_squares in num_squares_range:
+        for threshold in thresholds:
+            accuracies = []
+            for pairs_file in pairs_files:
+                pairs = read_pairs(pairs_file)
+                if not pairs:
+                    continue
+                tp = fp = tn = fn = 0
+                for file1, file2, is_same in pairs:
+                    image1 = preprocess_image(file1)
+                    image2 = preprocess_image(file2)
+                    different_person_image_path = get_different_person_image(file1, dataset_dir)
+                    if different_person_image_path:
+                        different_person_image = preprocess_image(different_person_image_path)
+                        image1 = swap_random_squares(image1, different_person_image, num_squares, square_size)
+
+                    similarity = calculate_similarity(image1, image2)
+                    is_positive_match = similarity > threshold
+                    if is_positive_match and is_same:
+                        tp += 1
+                    elif is_positive_match and not is_same:
+                        fp += 1
+                    elif not is_positive_match and not is_same:
+                        tn += 1
+                    elif not is_positive_match and is_same:
+                        fn += 1
+
+                total_comparisons = tp + fp + tn + fn
+                if total_comparisons == 0:
+                    accuracies.append(0)
+                else:
+                    accuracies.append((tp + tn) / total_comparisons)
+            results[num_squares][threshold] = np.mean(accuracies)
+
+    # Plotting
+    save_directory = "one-swap-different-person-both-sides-rand-square_plot"
+    os.makedirs(save_directory, exist_ok=True)
+    plt.figure(figsize=(10, 8))
+    for num_squares, accuracies_by_threshold in results.items():
+        thresholds_list = list(accuracies_by_threshold.keys())
+        accuracies_list = [accuracies_by_threshold[th] for th in thresholds_list]
+        plt.plot(thresholds_list, accuracies_list, label=f'Num Squares {num_squares}')
+
+    plt.xlabel('Threshold')
+    plt.ylabel('Accuracy')
+    plt.title('Effect of Swapping Random Squares with Different Person on Image1')
+    plt.legend(title='Number of Squares')
+    plt.grid(True)
+    save_path = os.path.join(save_directory, 'accuracy_vs_thresholds_by_num_squares.png')
+    plt.savefig(save_path)
+    plt.show()
+    plt.close()
+
+if __name__ == "__main__":
+    main()
+
