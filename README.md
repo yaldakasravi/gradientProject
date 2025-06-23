@@ -14,8 +14,6 @@ We focus on protecting sensitive biometric data — including face and fingerpri
 
 **Gradients Protection in Federated Learning for Biometric Authentication**
 
-**Supervisor:** [Abdelhakim Senhaji Hafid](https://www.iro.umontreal.ca/~ahafid/)
-
 ---
 
 ## Key Contributions
